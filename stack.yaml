@@ -39,7 +39,8 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
-# extra-deps: []
+extra-deps:
+- LParse-0.3.0.0@sha256:a5498ad80e85abac681cd90511c485a9b1e35fe3abc935331fca339ea966d61d
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
