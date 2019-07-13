@@ -7,19 +7,11 @@ import Data.Maybe
 import Text.LParse.Parser
 import Text.LParse.Prebuilt
 
-data Token = Keyword Keyword | SLit String | Identifier String | Op Operator | Indent Int | Whitespace deriving (Show,Eq)
-
-data TokenTree = TokenTree [Token] [TokenTree]
-
-instance Show TokenTree where
-    show = showTT 0
-
-showTT :: Int -> TokenTree -> String
-showTT i (TokenTree l tts) = ([1..i] >> " ") ++ show l ++ "\n" ++ concatMap (showTT (i+2)) tts
+data Token = Keyword Keyword | SLit String | Identifier String | Op Operator | Indent Int | Whitespace | Separator | BlockStart | BlockEnd deriving (Show,Eq)
 
 data Keyword = Room deriving (Show,Eq)
 
-data Operator = Colon deriving (Show,Eq)
+data Operator = Colon | LBrack | RBrack | LParen | RParen | Comma deriving (Show,Eq)
 
 keyword :: Parser r String Token
 keyword = consumeReturn "Room" (Keyword Room)
@@ -31,7 +23,13 @@ ident :: Parser r String Token
 ident = Identifier <$> ((:) <$> letter <*> many (letter <|> ((head . show) <$> digit)))
 
 op :: Parser r String Token
-op = consumeSReturn ':' $ Op Colon
+op = consumeSReturn ':' (Op Colon)
+    <|> consumeSReturn '[' (Op LBrack)
+    <|> consumeSReturn ']' (Op RBrack)
+    <|> consumeSReturn '(' (Op LParen)
+    <|> consumeSReturn ')' (Op RParen)
+    <|> consumeSReturn ',' (Op Comma)
+    <|> consumeSReturn ';' Separator
 
 whitespace :: Parser r String Token
 whitespace = some (consumeSingle ' ' <|> consumeSingle '\t') >> return Whitespace
@@ -57,18 +55,18 @@ tokenizeLine :: Parser r String [Token]
 tokenizeLine = ((:) <$> indent <*> tokenizeLineContent) << newline
 
 tokenizer :: Parser r String [Token]
-tokenizer = (>>= id) <$> (many tokenizeLine << eoi)
+tokenizer = ((++[Indent 0]) . (>>= id)) <$> (many tokenizeLine << eoi)
 
-blocker' :: Int -> Parser r [Token] TokenTree
-blocker' i = TokenTree <$> many (nParse (not . isIndent) tokenReturn "Internal Error") <*> many (nParse (\t -> case t of Indent i' | i' > i -> True; _ -> False) (((\(Indent i') -> i') <$> tokenReturn) >>= blocker') "Internal Error")
+blocker' :: Int -> Parser r [Token] [Token]
+blocker' i = do
+    line <- many (nParse (not . isIndent) tokenReturn "Internal Error")
+    i' <- ((\(Indent i') -> i') <$> tokenReturn)
+    if i' > i then 
+        (\b -> line ++ (Separator : BlockStart : b) ++ [BlockEnd]) <$> blocker' i'
+    else if i' == i then
+        ((line ++ [Separator]) ++) <$> blocker' i
+    else
+        return (line ++ [Separator])
 
-blocker :: Parser r [Token] TokenTree
-blocker = removeEmpty <$> (TokenTree <$> return [] <*> many (consumeSingle (Indent 0) >> blocker' 0)) << eoi
-
-removeEmpty' :: TokenTree -> Maybe TokenTree
-removeEmpty' (TokenTree [] []) = Nothing
-removeEmpty' (TokenTree [] xs) = (\xs' -> if null xs' then Nothing else Just (TokenTree [] xs')) (mapMaybe removeEmpty' xs)
-removeEmpty' (TokenTree l xs) = Just (TokenTree l $ mapMaybe removeEmpty' xs)
-
-removeEmpty :: TokenTree -> TokenTree
-removeEmpty = fromJust . removeEmpty'
+blocker :: Parser r [Token] [Token]
+blocker = (>>= id) <$> (consumeSingle (Indent 0) >> many (blocker' 0) << eoi)

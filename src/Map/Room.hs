@@ -3,8 +3,8 @@ module Map.Room where
 import Actions.GameState
 
 data Room = Room {
+    idt :: String,
     name :: String,
-    id :: String,
     description :: GameState Room -> String,
     getExit :: GameState Room -> String -> Either String Room
 }
