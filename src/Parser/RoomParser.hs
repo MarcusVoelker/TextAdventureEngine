@@ -58,7 +58,7 @@ room rs = do
         idt
         name
         (const description)
-        (\_ n -> maybe (Left "Error") Right $ lookup n exs)
+        (defaultGetExit (\_ n -> lookup n exs))
 
 rooms' :: M.Map String Room -> Parser r [Token] (M.Map String Room)
 rooms' rs = do

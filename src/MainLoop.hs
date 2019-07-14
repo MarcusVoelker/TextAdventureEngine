@@ -1,10 +1,12 @@
 module MainLoop where
 
+import Parser.ActionParser
 import Parser.RoomParser
 import Parser.Tokenizer
 import Actions.GameState
 import Actions.DefaultActions
 import Actions.Interaction
+import Map.Room
 
 import Text.LParse.Parser
 
@@ -12,6 +14,7 @@ import Control.Arrow
 import Control.Monad.Trans.State
 import Data.Maybe
 import qualified Data.Map.Strict as M
+import System.IO (hFlush, stdout)
 
 runGame :: IO ()
 runGame = do
@@ -21,4 +24,16 @@ runGame = do
         Left x -> print x
         Right rMap -> do
             let initial = initialState (fromJust $ M.lookup "init" rMap) []
-            evalStateT look initial
+            mainLoop initial
+
+mainLoop :: GameState Room -> IO ()
+mainLoop s = do
+    putStr "> "
+    hFlush stdout
+    command <- getLine
+    parse action command (\c -> do
+        s' <- execStateT c s
+        mainLoop s') (const $ do
+            putStrLn "I did not understand that."
+            mainLoop s
+            )

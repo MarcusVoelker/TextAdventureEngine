@@ -1,7 +1,7 @@
 Room init
   name: "Start"
-  description: "An empty room."
+  description: "An empty room. There is an exit to the north."
   exits: [("n","fdsa")]
 Room fdsa
   name: "Other"
-  description: "A room with a piano in it."
+  description: "A room with a piano in it. The archway to the south is crumbled."
