@@ -58,6 +58,7 @@ room rs = do
         idt
         name
         (const description)
+        (const ("Unknown object "++))
         (defaultGetExit (\_ n -> lookup n exs))
 
 rooms' :: M.Map String Room -> Parser r [Token] (M.Map String Room)
