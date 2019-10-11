@@ -60,7 +60,7 @@ tokenizer = ((++[Indent 0]) . (>>= id)) <$> (many tokenizeLine << eoi)
 blocker' :: Int -> Parser r [Token] [Token]
 blocker' i = do
     line <- many (nParse (not . isIndent) tokenReturn "Internal Error")
-    i' <- ((\(Indent i') -> i') <$> tokenReturn)
+    i' <- (\(Indent i') -> i') <$> tokenReturn
     if i' > i then 
         (\b -> line ++ (Separator : BlockStart : b) ++ [BlockEnd]) <$> blocker' i'
     else if i' == i then
