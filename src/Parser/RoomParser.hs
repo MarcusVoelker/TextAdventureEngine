@@ -53,11 +53,12 @@ room rs = do
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
     (SProp description) <- return $ fromMaybe (SProp "") (lookup "description" ps)
     (ListProp exits) <- return $ fromMaybe (ListProp []) (lookup "exits" ps)
-    let exs = mapMaybe (\(PairProp (SProp d,SProp n)) -> (\r -> (d,r)) <$> M.lookup n rs) exits
+    let exs = mapMaybe (\(PairProp (SProp d,SProp n)) -> (d,) <$> M.lookup n rs) exits
     return $ Room 
         idt
         name
         (const description)
+        (const ("Unknown object "++))
         (defaultGetExit (\_ n -> lookup n exs))
 
 rooms' :: M.Map String Room -> Parser r [Token] (M.Map String Room)

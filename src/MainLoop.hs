@@ -7,6 +7,8 @@ import Actions.GameState
 import Actions.DefaultActions
 import Actions.Interaction
 import Map.Room
+import Sound.Engine
+import Engine
 
 import Text.LParse.Parser
 
@@ -17,7 +19,7 @@ import qualified Data.Map.Strict as M
 import System.IO (hFlush, stdout)
 
 runGame :: IO ()
-runGame = do
+runGame = withEngine soundEngine $ do
     roomCode <- readFile "app/rooms.dat"
     let rs = doParse (tokenizer >>> blocker >>> rooms) roomCode
     case rs of

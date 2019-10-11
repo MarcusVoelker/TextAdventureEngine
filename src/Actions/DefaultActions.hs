@@ -12,6 +12,11 @@ look = do
     s <- get
     lift $ putStrLn $ description (location s) s
 
+lookAt :: String -> GameAction Room ()
+lookAt t = do
+    s <- get
+    lift $ putStrLn $ objDescription (location s) s t
+
 go :: String -> GameAction Room ()
 go e = do
     s <- get

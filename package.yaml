@@ -23,9 +23,13 @@ dependencies:
 - containers
 - transformers
 - LParse >= 0.3.1
+- proteaaudio
+- bytestring
+- filepath
 
 library:
   source-dirs: src
+  default-extensions: TupleSections
 
 executables:
   TextAdventureEngine-exe:

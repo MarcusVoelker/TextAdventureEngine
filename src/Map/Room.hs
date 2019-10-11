@@ -6,6 +6,7 @@ data Room = Room {
     idt :: String,
     name :: String,
     description :: GameState Room -> String,
+    objDescription :: GameState Room -> String -> String,
     getExit :: GameState Room -> String -> Either String Room
 }
 
