@@ -29,7 +29,7 @@ dependencies:
 
 library:
   source-dirs: src
-  default-extensions: TupleSections
+  default-extensions: TupleSections, LambdaCase
 
 executables:
   TextAdventureEngine-exe:

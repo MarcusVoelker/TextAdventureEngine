@@ -11,10 +11,15 @@ import Text.LParse.Prebuilt
 
 import Control.Applicative
 import Control.Monad
+import Data.List
 import Data.Maybe
 import qualified Data.Map.Strict as M
 
-data Property = SProp String | ListProp [Property] | PairProp (Property,Property)
+data Property = SProp String | ListProp [Property] | PairProp (Property,Property) deriving Eq
+
+isSProp :: Property -> Bool
+isSProp (SProp _) = True
+isSProp _ = False
 
 property :: Parser r [Token] Property
 property = (do
@@ -52,19 +57,26 @@ room rs = do
     consumeSingle BlockEnd
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
     (SProp description) <- return $ fromMaybe (SProp "") (lookup "description" ps)
+    (ListProp objects) <- return $ fromMaybe (ListProp []) (lookup "objects" ps)
     (ListProp exits) <- return $ fromMaybe (ListProp []) (lookup "exits" ps)
     let exs = mapMaybe (\(PairProp (SProp d,SProp n)) -> (d,) <$> M.lookup n rs) exits
     return $ Room 
         idt
         name
         (const description)
-        (const ("Unknown object "++))
+        (const (\s ->
+            fromMaybe ("I don't see any " ++ s) $ listToMaybe $ mapMaybe ((>>=(\case 
+                (ListProp os,SProp d) | SProp s `elem` os -> Just d
+                _ -> Nothing
+                )) 
+                .(\case
+                (PairProp p) -> Just p 
+                _ -> Nothing
+            )) objects 
+        ))
         (defaultGetExit (\_ n -> lookup n exs))
 
-rooms' :: M.Map String Room -> Parser r [Token] (M.Map String Room)
-rooms' rs = do
+rooms :: Parser r [Token] (M.Map String Room)
+rooms = pfix $ \rs -> do
     list <- many (room rs)
     return $ M.fromList $ map (\r -> (idt r,r)) list
-
-rooms :: Parser r [Token] (M.Map String Room)
-rooms = pfix rooms'
