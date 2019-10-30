@@ -1,6 +1,6 @@
-module Actions.Interaction where
+module Logic.Interaction where
 
-import Actions.GameState
+import Logic.GameState
 
 import Control.Monad.Trans.State
 

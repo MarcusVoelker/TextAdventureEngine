@@ -1,4 +1,4 @@
-module Actions.GameState where
+module Logic.GameState where
 
 import qualified Data.Map as M
 

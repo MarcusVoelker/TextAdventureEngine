@@ -1,8 +1,8 @@
 module Parser.ActionParser where
 
-import Actions.GameState
-import Actions.Interaction
-import Actions.DefaultActions
+import Logic.GameState
+import Logic.Interaction
+import Logic.DefaultActions
 import Map.Room
 
 import Text.LParse.Parser

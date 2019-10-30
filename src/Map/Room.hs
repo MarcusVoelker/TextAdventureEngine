@@ -1,6 +1,6 @@
 module Map.Room where
 
-import Actions.GameState
+import Logic.GameState
 
 data Room = Room {
     idt :: String,

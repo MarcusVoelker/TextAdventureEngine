@@ -1,7 +1,7 @@
-module Actions.DefaultActions where
+module Logic.DefaultActions where
 
-import Actions.GameState
-import Actions.Interaction
+import Logic.GameState
+import Logic.Interaction
 import Map.Room
 
 import Control.Monad.Trans.Class

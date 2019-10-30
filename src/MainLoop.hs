@@ -3,9 +3,9 @@ module MainLoop where
 import Parser.ActionParser
 import Parser.RoomParser
 import Parser.Tokenizer
-import Actions.GameState
-import Actions.DefaultActions
-import Actions.Interaction
+import Logic.GameState
+import Logic.DefaultActions
+import Logic.Interaction
 import Map.Room
 import Sound.Engine
 import Engine
