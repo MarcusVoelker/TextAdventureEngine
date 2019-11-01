@@ -26,10 +26,11 @@ dependencies:
 - proteaaudio
 - bytestring
 - filepath
+- lens
 
 library:
   source-dirs: src
-  default-extensions: TupleSections, LambdaCase
+  default-extensions: TupleSections, LambdaCase, TemplateHaskell
 
 executables:
   TextAdventureEngine-exe:

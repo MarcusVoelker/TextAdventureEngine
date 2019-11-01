@@ -1,7 +1,11 @@
 module Logic.Entity where
 
+import Control.Lens
+
 data Entity = Entity {
-    name :: String,
-    description :: String,
-    visible :: Bool
+    _name :: String,
+    _description :: String,
+    _visible :: Bool
 }
+
+makeLenses ''Entity

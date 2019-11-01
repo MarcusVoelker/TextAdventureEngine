@@ -11,6 +11,7 @@ import Text.LParse.Prebuilt
 
 import Control.Applicative
 import Control.Monad
+import Control.Lens.Getter
 import Data.List
 import Data.Maybe
 import qualified Data.Map.Strict as M
@@ -79,4 +80,4 @@ room rs = do
 rooms :: Parser r [Token] (M.Map String Room)
 rooms = pfix $ \rs -> do
     list <- many (room rs)
-    return $ M.fromList $ map (\r -> (idt r,r)) list
+    return $ M.fromList $ map (\r -> (r^.idt,r)) list

@@ -1,14 +1,23 @@
 module Map.Room where
 
+import Control.Lens
 import Logic.GameState
 
 data Room = Room {
-    idt :: String,
-    name :: String,
-    description :: GameState Room -> String,
-    objDescription :: GameState Room -> String -> String,
-    getExit :: GameState Room -> String -> Either String Room
+    _idt :: String,
+    _name :: String,
+    _description :: GameState Room -> String,
+    _objDescription :: GameState Room -> String -> String,
+    _getExit :: GameState Room -> String -> Either String Room
 }
+
+makeLenses ''Room
+
+instance Eq Room where
+    a == b = _idt a == _idt b
+
+instance Ord Room where
+    compare a b = compare (_idt a) (_idt b)
 
 defaultGetExit :: (GameState Room -> String -> Maybe Room) -> GameState Room -> String -> Either String Room
 defaultGetExit ge s e = 

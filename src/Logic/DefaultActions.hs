@@ -1,27 +1,42 @@
 module Logic.DefaultActions where
 
+import Logic.Entity
 import Logic.GameState
 import Logic.Interaction
-import Map.Room
+import Map.Room hiding (name,description)
+import qualified Map.Room as Room (name,description)
 
+import Control.Lens
+import Control.Lens.Getter
+import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
+import qualified Data.Map as M
 
 look :: GameAction Room ()
 look = do
     s <- get
-    lift $ putStrLn $ description (location s) s
+    r <- use location
+    lift $ putStrLn $ (r^.Room.description) s
+    es <- (M.findWithDefault [] r) <$> use entities 
+    lift $ putStrLn "\nYou see here:"
+    lift $ forM_ es $ \e -> do
+        putStr "    "
+        print $ e^.name
+        putStrLn ""
 
 lookAt :: String -> GameAction Room ()
 lookAt t = do
     s <- get
-    lift $ putStrLn $ objDescription (location s) s t
+    r <- use location
+    lift $ putStrLn $ (r^.objDescription) s t
 
 go :: String -> GameAction Room ()
 go e = do
     s <- get
-    case getExit (location s) s e of
+    r <- use location
+    case (r^.getExit) s e of
         Left err -> lift $ putStrLn err
         Right r' -> do
-            put (GameState r' (variables s))
+            location .= r'
             look
