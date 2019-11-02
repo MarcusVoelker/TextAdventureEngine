@@ -13,7 +13,7 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import qualified Data.Map as M
 
-look :: GameAction Room ()
+look :: GameAction ()
 look = do
     s <- get
     r <- use playerLocation
@@ -25,13 +25,13 @@ look = do
         print $ e^.name
         putStrLn ""
 
-lookAt :: String -> GameAction Room ()
+lookAt :: String -> GameAction ()
 lookAt t = do
     s <- get
     r <- use playerLocation
     lift $ putStrLn $ (r^.objDescription) s t
 
-go :: String -> GameAction Room ()
+go :: String -> GameAction ()
 go e = do
     s <- get
     r <- use playerLocation

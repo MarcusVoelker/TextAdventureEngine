@@ -28,7 +28,7 @@ runGame = withEngine soundEngine $ do
             let initial = initialState (fromJust $ M.lookup "init" rMap) []
             mainLoop initial
 
-mainLoop :: GameState Room -> IO ()
+mainLoop :: GameState -> IO ()
 mainLoop s = do
     putStr "> "
     hFlush stdout

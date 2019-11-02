@@ -10,13 +10,13 @@ import Text.LParse.Prebuilt
 
 import Control.Applicative
 
-lookAction :: Parser r String (GameAction Room ())
+lookAction :: Parser r String (GameAction ())
 lookAction = do
     consume "look" 
     l <- (lookAt <$> (consumeSingle ' ' >> word)) <|> return look
     eoi 
     return l 
 
-action :: Parser r String (GameAction Room ())
+action :: Parser r String (GameAction ())
 action = lookAction
     <|> (go <$> (consume "go " >> word << eoi))

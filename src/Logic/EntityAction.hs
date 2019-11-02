@@ -4,22 +4,24 @@ import Logic.Entity
 import Logic.GameState
 import Logic.Interaction
 
+import Map.Room
+
 import Control.Lens
 import Control.Monad.Trans.State hiding (state)
 import Data.List
 import qualified Data.Map as M
 
-data EntityState p = EntityState {
-    _elocation :: p,
+data EntityState = EntityState {
+    _elocation :: Room GameState,
     _varState :: M.Map String Int,
     _globalState :: M.Map String Int
 }
 
 makeLenses ''EntityState
 
-type EntityAction p a = StateT (EntityState p) IO a
+type EntityAction a = StateT EntityState IO a
 
-liftE :: (Eq p, Ord p) => Entity p -> EntityAction p a -> GameAction p a
+liftE :: Entity GameState -> EntityAction a -> GameAction a
 liftE e = zoom $ lens 
     (\gs -> EntityState (e^.location) (e^.state) (gs^.variables))
     (\gs es -> gs 

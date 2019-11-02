@@ -48,7 +48,7 @@ propertyLine = do
     consumeSingle Separator
     return (p,c)
 
-room :: M.Map String Room -> Parser r [Token] Room
+room :: M.Map String (Room s) -> Parser r [Token] (Room s)
 room rs = do
     consumeSingle $ Keyword T.Room
     (Identifier idt) <- tokenReturn
@@ -77,7 +77,7 @@ room rs = do
         ))
         (defaultGetExit (\_ n -> lookup n exs))
 
-rooms :: Parser r [Token] (M.Map String Room)
+rooms :: Parser r [Token] (M.Map String (Room s))
 rooms = pfix $ \rs -> do
     list <- many (room rs)
     return $ M.fromList $ map (\r -> (r^.idt,r)) list

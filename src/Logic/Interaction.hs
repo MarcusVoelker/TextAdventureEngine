@@ -4,4 +4,4 @@ import Logic.GameState
 
 import Control.Monad.Trans.State
 
-type GameAction p a = StateT (GameState p) IO a
+type GameAction a = StateT GameState IO a

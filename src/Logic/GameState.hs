@@ -3,16 +3,17 @@ module Logic.GameState where
 import Control.Lens
 
 import Logic.Entity
+import Map.Room
 
 import qualified Data.Map as M
 
-data GameState p = GameState {
-    _playerLocation :: p,
+data GameState = GameState {
+    _playerLocation :: Room GameState,
     _variables :: M.Map String Int,
-    _entities :: M.Map p [Entity p]
+    _entities :: M.Map (Room GameState) [Entity GameState]
 }
 
 makeLenses ''GameState
 
-initialState :: p -> [String] -> GameState p
-initialState p vs = GameState p (M.fromList $ map (,0) vs) M.empty
+initialState :: Room GameState -> [String] -> GameState
+initialState r vs = GameState r (M.fromList $ map (,0) vs) M.empty
