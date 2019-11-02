@@ -16,9 +16,9 @@ import qualified Data.Map as M
 look :: GameAction Room ()
 look = do
     s <- get
-    r <- use location
+    r <- use playerLocation
     lift $ putStrLn $ (r^.Room.description) s
-    es <- (M.findWithDefault [] r) <$> use entities 
+    es <- M.findWithDefault [] r <$> use entities 
     lift $ putStrLn "\nYou see here:"
     lift $ forM_ es $ \e -> do
         putStr "    "
@@ -28,15 +28,15 @@ look = do
 lookAt :: String -> GameAction Room ()
 lookAt t = do
     s <- get
-    r <- use location
+    r <- use playerLocation
     lift $ putStrLn $ (r^.objDescription) s t
 
 go :: String -> GameAction Room ()
 go e = do
     s <- get
-    r <- use location
+    r <- use playerLocation
     case (r^.getExit) s e of
         Left err -> lift $ putStrLn err
         Right r' -> do
-            location .= r'
+            playerLocation .= r'
             look
