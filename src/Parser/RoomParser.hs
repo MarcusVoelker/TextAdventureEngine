@@ -5,6 +5,7 @@ import qualified Parser.Tokenizer as T (Keyword(Room))
 import Parser.ObjectParser
 
 import Map.Room
+import Thing
 
 import Control.DoubleContinuations
 import Text.LParse.Parser

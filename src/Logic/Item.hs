@@ -1,12 +1,14 @@
 module Logic.Item where
 
+import Thing
+
 import Control.Lens
 
 data Item = Item {
-    _idt :: String,
-    _name :: String,
-    _description :: String,
-    _stackable :: Bool
+    _itemIdt :: String,
+    _itemName :: String,
+    _itemDescription :: String,
+    _itemStackable :: Bool
 } deriving (Eq,Ord)
 
-makeLenses ''Item
+makeFields ''Item

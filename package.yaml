@@ -30,7 +30,7 @@ dependencies:
 
 library:
   source-dirs: src
-  default-extensions: TupleSections, LambdaCase, TemplateHaskell
+  default-extensions: TupleSections, LambdaCase, TemplateHaskell, MultiParamTypeClasses, TypeSynonymInstances, FunctionalDependencies, FlexibleInstances
 
 executables:
   TextAdventureEngine-exe:

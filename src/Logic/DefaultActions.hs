@@ -1,13 +1,13 @@
 module Logic.DefaultActions where
 
-import Logic.Entity hiding (location)
+import Logic.Entity
 import Logic.GameState
 import Logic.Interaction
 import Logic.Player
-import Logic.Item hiding (name)
-import qualified Logic.Item as I (name)
-import Map.Room hiding (name,description)
-import qualified Map.Room as Room (name,description)
+import Logic.Item
+
+import Map.Room
+import Thing
 
 import Control.Lens
 import Control.Lens.Getter
@@ -20,7 +20,7 @@ look :: GameAction ()
 look = do
     s <- get
     r <- use (player.location)
-    lift $ putStrLn $ (r^.Room.description) s
+    lift $ putStrLn $ (r^.description) s
     es <- M.findWithDefault [] r <$> use entities 
     unless (null es) $ do
         lift $ putStrLn "\nYou see here:"
@@ -54,7 +54,7 @@ viewInv = do
         else
             flip M.foldMapWithKey inv $ \k v -> do
                 putStr "    "
-                print $ k^.I.name
+                print $ k^.name
                 putStr ": "
                 print v
                 putStrLn ""

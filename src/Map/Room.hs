@@ -1,22 +1,24 @@
 module Map.Room where
 
+import Thing
+
 import Control.Lens
 
 data Room s = Room {
-    _idt :: String,
-    _name :: String,
-    _description :: s -> String,
-    _objDescription :: s -> String -> String,
-    _getExit :: s -> String -> Either String (Room s)
+    _roomIdt :: String,
+    _roomName :: String,
+    _roomDescription :: s -> String,
+    _roomObjDescription :: s -> String -> String,
+    _roomGetExit :: s -> String -> Either String (Room s)
 }
 
-makeLenses ''Room
+makeFields ''Room
 
 instance Eq (Room s) where
-    a == b = _idt a == _idt b
+    a == b = a^.idt == b^.idt
 
 instance Ord (Room s) where
-    compare a b = compare (_idt a) (_idt b)
+    compare a b = compare (a^.idt) (b^.idt)
 
 defaultGetExit :: (s -> String -> Maybe (Room s)) -> s -> String -> Either String (Room s)
 defaultGetExit ge s e = 
