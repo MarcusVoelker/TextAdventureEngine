@@ -13,6 +13,7 @@ import Engine
 import Text.LParse.Parser
 
 import Control.Arrow
+import Control.Monad
 import Control.Monad.Trans.State
 import Data.Maybe
 import qualified Data.Map.Strict as M
@@ -33,9 +34,10 @@ mainLoop s = do
     putStr "> "
     hFlush stdout
     command <- getLine
-    parse action command (\c -> do
-        s' <- execStateT c s
-        mainLoop s') (const $ do
-            putStrLn "I did not understand that."
-            mainLoop s
-            )
+    unless (command == "quit") $
+        parse action command (\c -> do
+            s' <- execStateT c s
+            mainLoop s') (const $ do
+                putStrLn "I did not understand that."
+                mainLoop s
+                )
