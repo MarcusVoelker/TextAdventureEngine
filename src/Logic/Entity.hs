@@ -1,11 +1,12 @@
 module Logic.Entity where
 
-import Map.Room hiding (_name)
+import Map.Room hiding (_idt)
 
 import Control.Lens
 import qualified Data.Map as M
 
 data Entity s = Entity {
+    _idt :: String,
     _name :: String,
     _description :: String,
     _visible :: Bool,
@@ -14,6 +15,6 @@ data Entity s = Entity {
 }
 
 instance Eq (Entity s) where
-    a == b = _name a == _name b
+    a == b = _idt a == _idt b
 
 makeLenses ''Entity

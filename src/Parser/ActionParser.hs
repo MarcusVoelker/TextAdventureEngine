@@ -19,4 +19,5 @@ lookAction = do
 
 action :: Parser r String (GameAction ())
 action = lookAction
+    <|> (consume "inventory" >> return viewInv << eoi)
     <|> (go <$> (consume "go " >> word << eoi))
