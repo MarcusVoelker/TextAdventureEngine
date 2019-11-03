@@ -1,5 +1,6 @@
 module Logic.Entity where
 
+import Logic.Item
 import Thing
 
 import Map.Room
@@ -12,7 +13,8 @@ data EntityKind = EntityKind {
     _entityKindIdt :: String,
     _entityKindName :: String,
     _entityKindDescription :: String,
-    _entityKindVisible :: Bool
+    _entityKindVisible :: Bool,
+    _entityKindItem :: Maybe Item
 }
 
 data Entity s =  Entity {

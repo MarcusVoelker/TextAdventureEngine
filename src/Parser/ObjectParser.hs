@@ -8,7 +8,7 @@ import Text.LParse.Prebuilt
 
 import Control.Applicative
 
-data Property = SProp String | ListProp [Property] | PairProp (Property,Property) deriving Eq
+data Property = TagProp | SProp String | ListProp [Property] | PairProp (Property,Property) deriving Eq
 
 data Object = Object {
     objType :: Keyword,
@@ -37,15 +37,17 @@ property = (do
         s <- property
         consumeSingle $ Op RParen
         return $ PairProp (f,s) 
-    )
+    ) 
 
 propertyLine :: Parser r [Token] (String,Property)
 propertyLine = do
     (Identifier p)  <- tokenReturn
-    consumeSingle $ Op Colon
-    c <- property
-    consumeSingle Separator
-    return (p,c)
+    (do 
+        consumeSingle $ Op Colon
+        c <- property
+        consumeSingle Separator
+        return (p,c)
+        ) <|> consumeSReturn Separator (p,TagProp)
 
 object :: Parser r [Token] Object
 object = do

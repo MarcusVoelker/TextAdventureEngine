@@ -2,6 +2,7 @@ module MainLoop where
 
 import Parser.ActionParser
 import Parser.EntityParser
+import Parser.ItemParser
 import Parser.RoomParser
 import Parser.Tokenizer
 import Logic.GameState
@@ -24,16 +25,21 @@ runGame :: IO ()
 runGame = withEngine soundEngine $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
+    itemCode <- readFile "app/items.dat"
     let rs = doParse (tokenizer >>> blocker >>> rooms) roomCode
     case rs of
         Left x -> putStr "While parsing rooms: " >> print x
         Right rMap -> do
-            let es = doParse (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap) entityCode
-            case es of
-                Left x -> putStr "While parsing entities: " >> print x
-                Right es -> do
-                    let initial = initialState (fromJust $ M.lookup "init" rMap) (mapMaybe (\(r,e) -> (,e) <$> r) es) []
-                    mainLoop initial
+            let is = doParse (tokenizer >>> blocker >>> items) itemCode
+            case is of
+                Left x -> putStr "While parsing items: " >> print x
+                Right iMap -> do
+                    let es = doParse (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap iMap) entityCode
+                    case es of
+                        Left x -> putStr "While parsing entities: " >> print x
+                        Right es -> do
+                            let initial = initialState (fromJust $ M.lookup "init" rMap) (mapMaybe (\(r,e) -> (,e) <$> r) es) []
+                            mainLoop initial
 
 mainLoop :: GameState -> IO ()
 mainLoop s = do

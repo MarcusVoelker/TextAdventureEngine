@@ -17,7 +17,15 @@ lookAction = do
     eoi 
     return l 
 
+takeAction :: Parser r String (GameAction ())
+takeAction = do
+    consume "take" 
+    l <- (takeItem <$> (some (consumeSingle ' ') >> full)) <|> return look
+    eoi 
+    return l 
+
 action :: Parser r String (GameAction ())
 action = lookAction
+    <|> takeAction
     <|> (consume "inventory" >> return viewInv << eoi)
     <|> (go <$> (consume "go " >> word << eoi))

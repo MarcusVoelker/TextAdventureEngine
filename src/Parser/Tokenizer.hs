@@ -9,13 +9,14 @@ import Text.LParse.Prebuilt
 
 data Token = Keyword Keyword | SLit String | Identifier String | Op Operator | Indent Int | Whitespace | Separator | BlockStart | BlockEnd deriving (Show,Eq)
 
-data Keyword = Room | Entity deriving (Show,Eq)
+data Keyword = Room | Entity | Item deriving (Show,Eq)
 
 data Operator = Colon | LBrack | RBrack | LParen | RParen | Comma deriving (Show,Eq)
 
 keyword :: Parser r String Token
 keyword = consumeReturn "Room" (Keyword Room)
     <|> consumeReturn "Entity" (Keyword Entity)
+    <|> consumeReturn "Item" (Keyword Item)
 
 slit :: Parser r String Token
 slit = SLit <$> surround "\"\"" (many (nParse (/= '"') tokenReturn "Internal Error"))

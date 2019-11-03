@@ -15,3 +15,4 @@ data Player s = Player {
 }
 
 makeFields ''Player
+

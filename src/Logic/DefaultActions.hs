@@ -32,9 +32,22 @@ lookAt t = do
     r <- use (player.location)
     es <- M.findWithDefault [] r <$> use entities 
     let e = find (\e -> e^.name == t) es
-    lift $ case e of 
-        Nothing -> putStrLn $ "I cannot see any " ++ t ++ "!"
-        Just e -> putStrLn $ e^.description
+    lift $ putStrLn $ case e of 
+        Nothing -> "I cannot see any " ++ t ++ "!"
+        Just e -> e^.description
+
+takeItem :: String -> GameAction ()
+takeItem t = do
+    r <- use (player.location)
+    es <- M.findWithDefault [] r <$> use entities 
+    let e = find (\e -> e^.name == t) es
+    case e of 
+        Nothing -> lift $ putStrLn $ "I cannot see any " ++ t ++ "!"
+        Just e -> case e^.kind.item of 
+            Nothing -> lift $ putStrLn $ "I cannot pick up " ++ t ++ "!"
+            Just i -> do 
+                removeEntity r e 
+                addToInventory i
 
 go :: String -> GameAction ()
 go e = do
@@ -54,8 +67,7 @@ viewInv = do
             putStrLn "You are carrying nothing."
         else
             flip M.foldMapWithKey inv $ \k v -> do
-                putStr "    "
-                print $ k^.name
-                putStr ": "
-                print v
-                putStrLn ""
+                if (k^.stackable) then 
+                    putStrLn $ "    " ++ (k^.name) ++ ": " ++ show v
+                else
+                    putStrLn $ "    " ++ (k^.name)
