@@ -20,7 +20,7 @@ slit :: Parser r String Token
 slit = SLit <$> surround "\"\"" (many (nParse (/= '"') tokenReturn "Internal Error"))
 
 ident :: Parser r String Token
-ident = Identifier <$> ((:) <$> letter <*> many (letter <|> ((head . show) <$> digit)))
+ident = Identifier <$> ((:) <$> letter <*> many (letter <|> (head . show <$> digit)))
 
 op :: Parser r String Token
 op = consumeSReturn ':' (Op Colon)
@@ -38,7 +38,7 @@ newline :: Parser r String ()
 newline = consumeSingle '\n' <|> consume "\r\n"
 
 indent :: Parser r String Token
-indent = (Indent . length) <$> many (consumeSingle ' ' <|> consumeSingle '\t')
+indent = Indent . length <$> many (consumeSingle ' ' <|> consumeSingle '\t')
 
 isW :: Token -> Bool
 isW Whitespace = True
@@ -55,7 +55,7 @@ tokenizeLine :: Parser r String [Token]
 tokenizeLine = ((:) <$> indent <*> tokenizeLineContent) << newline
 
 tokenizer :: Parser r String [Token]
-tokenizer = ((++[Indent 0]) . (>>= id)) <$> (many tokenizeLine << eoi)
+tokenizer = (++[Indent 0]) . (>>= id) <$> (many tokenizeLine << eoi)
 
 blocker' :: Int -> Parser r [Token] [Token]
 blocker' i = do
