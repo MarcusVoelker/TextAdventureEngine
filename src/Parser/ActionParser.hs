@@ -13,7 +13,7 @@ import Control.Applicative
 lookAction :: Parser r String (GameAction ())
 lookAction = do
     consume "look" 
-    l <- (lookAt <$> (consumeSingle ' ' >> word)) <|> return look
+    l <- (lookAt <$> (some (consumeSingle ' ') >> full)) <|> return look
     eoi 
     return l 
 

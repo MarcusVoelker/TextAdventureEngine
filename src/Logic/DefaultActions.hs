@@ -25,10 +25,7 @@ look = do
     es <- M.findWithDefault [] r <$> use entities 
     unless (null es) $ lift $ do
         putStrLn "\nYou see here:"
-        forM_ es $ \e -> do
-            putStr "    "
-            print $ e^.name
-            putStrLn ""
+        forM_ es $ \e -> putStrLn $ "    " ++ (e^.name)
 
 lookAt :: String -> GameAction ()
 lookAt t = do

@@ -16,5 +16,6 @@ data GameState = GameState {
 
 makeFields ''GameState
 
-initialState :: Room GameState -> [String] -> GameState
-initialState r vs = GameState (Player r M.empty) (M.fromList $ map (,0) vs) M.empty
+initialState :: Room GameState -> [(Room GameState,EntityKind)] -> [String] -> GameState
+initialState r es vs = GameState (Player r M.empty) (M.fromList $ map (,0) vs) $ 
+    M.fromListWith (++) $ map (\(r,k) -> (r,[Entity "k" k M.empty r])) es
