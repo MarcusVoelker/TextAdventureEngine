@@ -8,7 +8,6 @@ data Room s = Room {
     _roomIdt :: String,
     _roomName :: String,
     _roomDescription :: s -> String,
-    _roomObjDescription :: s -> String -> String,
     _roomGetExit :: s -> String -> Either String (Room s)
 }
 

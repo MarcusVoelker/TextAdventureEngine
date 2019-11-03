@@ -14,6 +14,7 @@ import Control.Lens.Getter
 import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
+import Data.List
 import qualified Data.Map as M
 
 look :: GameAction ()
@@ -22,18 +23,21 @@ look = do
     r <- use (player.location)
     lift $ putStrLn $ (r^.description) s
     es <- M.findWithDefault [] r <$> use entities 
-    unless (null es) $ do
-        lift $ putStrLn "\nYou see here:"
-        lift $ forM_ es $ \e -> do
+    unless (null es) $ lift $ do
+        putStrLn "\nYou see here:"
+        forM_ es $ \e -> do
             putStr "    "
             print $ e^.name
             putStrLn ""
 
 lookAt :: String -> GameAction ()
 lookAt t = do
-    s <- get
     r <- use (player.location)
-    lift $ putStrLn $ (r^.objDescription) s t
+    es <- M.findWithDefault [] r <$> use entities 
+    let e = find (\e -> e^.name == t) es
+    lift $ case e of 
+        Nothing -> putStrLn $ "I cannot see any " ++ t ++ "!"
+        Just e -> putStrLn $ e^.description
 
 go :: String -> GameAction ()
 go e = do

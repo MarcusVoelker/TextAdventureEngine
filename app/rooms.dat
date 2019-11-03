@@ -1,9 +1,7 @@
 Room init
   name: "Start"
   description: "An empty room. There is an exit to the north."
-  objects: [(["exit","archway"],"A crumbling stone archway that light is shining through")]
   exits: [("n","fdsa")]
 Room fdsa
   name: "Other"
   description: "A sunlit room with a piano in it. The archway to the south is crumbled."
-  objects: [(["archway"],"When did it crumble? You did not hear a sound"),(["piano"],"A dusty piano")]

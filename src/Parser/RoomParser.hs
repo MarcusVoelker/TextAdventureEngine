@@ -23,23 +23,12 @@ room rs = do
     (Object T.Room idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
     (SProp description) <- return $ fromMaybe (SProp "") (lookup "description" ps)
-    (ListProp objects) <- return $ fromMaybe (ListProp []) (lookup "objects" ps)
     (ListProp exits) <- return $ fromMaybe (ListProp []) (lookup "exits" ps)
     let exs = mapMaybe (\(PairProp (SProp d,SProp n)) -> (d,) <$> M.lookup n rs) exits
     return $ Room 
         idt
         name
         (const description)
-        (const (\s ->
-            fromMaybe ("I don't see any " ++ s) $ listToMaybe $ mapMaybe ((>>=(\case 
-                (ListProp os,SProp d) | SProp s `elem` os -> Just d
-                _ -> Nothing
-                )) 
-                .(\case
-                (PairProp p) -> Just p 
-                _ -> Nothing
-            )) objects 
-        ))
         (defaultGetExit (\_ n -> lookup n exs))
 
 rooms :: Parser r [Token] (M.Map String (Room s))
