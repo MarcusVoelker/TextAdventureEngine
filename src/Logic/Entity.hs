@@ -18,7 +18,7 @@ data EntityKind = EntityKind {
 }
 
 data Entity s =  Entity {
-    _entityIdt :: String,
+    _entityIdt :: Int,
     _entityKind :: EntityKind,
     _entityState :: M.Map String Int,
     _entityLocation :: Room s

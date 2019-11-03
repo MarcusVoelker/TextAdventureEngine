@@ -38,8 +38,9 @@ runGame = withEngine soundEngine $ do
                     case es of
                         Left x -> putStr "While parsing entities: " >> print x
                         Right es -> do
-                            let initial = initialState (fromJust $ M.lookup "init" rMap) (mapMaybe (\(r,e) -> (,e) <$> r) es) []
-                            mainLoop initial
+                            let initial = initialState (fromJust $ M.lookup "init" rMap)  []
+                            let initial' = execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
+                            initial' >>= mainLoop
 
 mainLoop :: GameState -> IO ()
 mainLoop s = do
