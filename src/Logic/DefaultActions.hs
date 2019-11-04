@@ -27,27 +27,29 @@ look = do
         putStrLn "\nYou see here:"
         forM_ es $ \e -> putStrLn $ "    " ++ (e^.name)
 
-lookAt :: String -> GameAction ()
-lookAt t = do
+findEntity :: String -> GameAction (Maybe (Entity GameState))
+findEntity t = do
     r <- use (player.location)
     es <- M.findWithDefault [] r <$> use entities 
-    let e = find (\e -> e^.name == t) es
-    lift $ putStrLn $ case e of 
-        Nothing -> "I cannot see any " ++ t ++ "!"
-        Just e -> e^.description
+    return $ find (\e -> e^.name == t) es
+
+withEntity :: String -> (Entity GameState -> GameAction ()) -> GameAction ()
+withEntity t a = do
+    e <- findEntity t
+    case e of 
+        Nothing -> lift (putStrLn ("I cannot see any " ++ t ++ "!"))
+        Just e -> a e
+
+lookAt :: String -> GameAction ()
+lookAt t = withEntity t $ \e -> lift $ putStrLn $ e^.description
 
 takeItem :: String -> GameAction ()
-takeItem t = do
-    r <- use (player.location)
-    es <- M.findWithDefault [] r <$> use entities 
-    let e = find (\e -> e^.name == t) es
-    case e of 
-        Nothing -> lift $ putStrLn $ "I cannot see any " ++ t ++ "!"
-        Just e -> case e^.kind.item of 
-            Nothing -> lift $ putStrLn $ "I cannot pick up " ++ t ++ "!"
-            Just i -> do 
-                removeEntity r e 
-                addToInventory i
+takeItem t = withEntity t $ \e -> case e^.kind.item of 
+    Nothing -> lift $ putStrLn $ "I cannot pick up " ++ t ++ "!"
+    Just i -> do 
+        r <- use (player.location)
+        removeEntity r e 
+        addToInventory i
 
 go :: String -> GameAction ()
 go e = do
@@ -64,10 +66,10 @@ viewInv = do
     inv <- use (player.inventory)
     lift $ 
         if M.null inv then
-            putStrLn "You are carrying nothing."
+            putStrLn "I am carrying nothing."
         else
-            flip M.foldMapWithKey inv $ \k v -> do
-                if (k^.stackable) then 
-                    putStrLn $ "    " ++ (k^.name) ++ ": " ++ show v
+            flip M.foldMapWithKey inv $ \k v -> putStrLn $ "    " ++ (k^.name) ++
+                if k^.stackable then 
+                    ": " ++ show v
                 else
-                    putStrLn $ "    " ++ (k^.name)
+                    ""
