@@ -30,13 +30,12 @@ fullParser r e i = do
     let initial = initialState (fromJust $ M.lookup "init" rMap) []
     return $ execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
-
 runGame :: IO ()
 runGame = withEngine soundEngine $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
     itemCode <- readFile "app/items.dat"
-    run (fullParser roomCode entityCode itemCode) (>>= mainLoop) putStrLn
+    run (fullParser roomCode entityCode itemCode) (>>=mainLoop) putStrLn
 
 mainLoop :: GameState -> IO ()
 mainLoop s = do
