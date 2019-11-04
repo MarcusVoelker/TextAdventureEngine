@@ -5,5 +5,9 @@ Entity key
   item: "skey"
 Entity piano
   name: "Broken Piano"
-  description: "A silver key with scuff marks all over its length"
+  description: "A piano that doesn't work"
+  location: "fdsa"
+Entity sdoor
+  name: "Silvered Door"
+  description: "A door with a silvery lock"
   location: "fdsa"

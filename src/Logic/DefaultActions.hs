@@ -73,3 +73,7 @@ viewInv = do
                     ": " ++ show v
                 else
                     ""
+
+useOn :: String -> String -> GameAction ()
+useOn i t = withEntity t $ \e -> do
+    lift $ putStrLn "Whoops!"
