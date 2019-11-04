@@ -26,21 +26,15 @@ runGame = withEngine soundEngine $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
     itemCode <- readFile "app/items.dat"
-    let rs = doParse (tokenizer >>> blocker >>> rooms) roomCode
-    case rs of
-        Left x -> putStr "While parsing rooms: " >> print x
-        Right rMap -> do
-            let is = doParse (tokenizer >>> blocker >>> items) itemCode
-            case is of
-                Left x -> putStr "While parsing items: " >> print x
-                Right iMap -> do
-                    let es = doParse (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap iMap) entityCode
-                    case es of
-                        Left x -> putStr "While parsing entities: " >> print x
-                        Right es -> do
-                            let initial = initialState (fromJust $ M.lookup "init" rMap)  []
-                            let initial' = execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
-                            initial' >>= mainLoop
+    parse (tokenizer >>> blocker >>> rooms) roomCode (\rMap ->
+        parse (tokenizer >>> blocker >>> items) itemCode (\iMap ->
+                parse (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap iMap) entityCode (\es -> do
+                    let initial = initialState (fromJust $ M.lookup "init" rMap)  []
+                    let initial' = execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
+                    initial' >>= mainLoop
+                ) (\e -> putStrLn $ "While parsing entities: " ++ e)
+            ) (\e -> putStrLn $ "While parsing items: " ++ e)
+        ) (\e -> putStrLn $ "While parsing rooms: " ++ e)
 
 mainLoop :: GameState -> IO ()
 mainLoop s = do
