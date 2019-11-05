@@ -22,7 +22,7 @@ getFreeIdt = do
     nextIdt %= (+1)
     return i
 
-instantiateEntity :: Room GameState -> EntityKind -> GameAction ()
+instantiateEntity :: Room GameState -> EntityKind GameState -> GameAction ()
 instantiateEntity r k = do
     i <- getFreeIdt
     entities %= M.insertWith (++) r [Entity i k M.empty r]

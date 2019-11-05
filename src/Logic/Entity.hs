@@ -9,27 +9,34 @@ import Control.Lens
 import Control.Lens.Lens
 import qualified Data.Map as M
 
-data EntityKind = EntityKind {
+data UseEvent s = UnlockDoor {
+    _useEventItem :: Item,
+    _useEventNewRoom :: Room s
+}
+
+data EntityKind s = EntityKind {
     _entityKindIdt :: String,
     _entityKindName :: String,
     _entityKindDescription :: String,
     _entityKindVisible :: Bool,
-    _entityKindItem :: Maybe Item
+    _entityKindItem :: Maybe Item,
+    _entityKindAccepts :: M.Map Item (UseEvent s)
 }
 
-data Entity s =  Entity {
+data Entity s = Entity {
     _entityIdt :: Int,
-    _entityKind :: EntityKind,
+    _entityKind :: EntityKind s,
     _entityState :: M.Map String Int,
     _entityLocation :: Room s
 }
 
-instance Eq EntityKind where
+instance Eq (EntityKind s) where
     a == b = a^.idt == b^.idt
 
 instance Eq (Entity s) where
     a == b = a^.idt == b^.idt
 
+makeFields ''UseEvent
 makeFields ''EntityKind
 makeFields ''Entity
 

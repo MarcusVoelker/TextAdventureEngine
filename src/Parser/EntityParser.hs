@@ -18,14 +18,16 @@ import Data.List
 import qualified Data.Map as M
 import Data.Maybe
 
-entity :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] (Maybe (Room s),EntityKind)
+entity :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] (Maybe (Room s),EntityKind s)
 entity rs is = do
     (Object T.Entity idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
     (SProp description) <- return $ fromMaybe (SProp "") (lookup "description" ps)
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
-    return (room,EntityKind idt name description True item)
+    (ListProp acs) <- return $ fromMaybe (ListProp []) (lookup "accepts" ps)
+    let accepts = M.fromList $ map (\(PairProp (SProp i, PairProp (SProp "unlock", SProp r))) -> undefined) acs 
+    return (room,EntityKind idt name description True item accepts)
 
-entities :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] [(Maybe (Room s),EntityKind)]
+entities :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] [(Maybe (Room s),EntityKind s)]
 entities rs is = many $ entity rs is

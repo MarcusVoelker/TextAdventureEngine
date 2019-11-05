@@ -40,6 +40,18 @@ withEntity t a = do
         Nothing -> lift (putStrLn ("I cannot see any " ++ t ++ "!"))
         Just e -> a e
 
+findItem :: String -> GameAction (Maybe Item)
+findItem t = do
+    inv <- use $ player.inventory
+    return $ find (\i -> i^.name == t) $ M.keys inv
+
+withItem :: String -> (Item -> GameAction ()) -> GameAction ()
+withItem t a = do
+    i <- findItem t
+    case i of 
+        Nothing -> lift (putStrLn ("I am not carrying any " ++ t ++ "!"))
+        Just i -> a i
+
 lookAt :: String -> GameAction ()
 lookAt t = withEntity t $ \e -> lift $ putStrLn $ e^.description
 
@@ -75,5 +87,6 @@ viewInv = do
                     ""
 
 useOn :: String -> String -> GameAction ()
-useOn i t = withEntity t $ \e -> do
-    lift $ putStrLn "Whoops!"
+useOn ti te = withEntity te $ \e -> 
+    withItem ti $ \i ->
+        lift $ putStrLn "I sure can use that!"

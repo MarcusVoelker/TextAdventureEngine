@@ -35,7 +35,7 @@ useAction = do
     words <- sepSome (void $ some $ consumeSingle ' ') word
     eoi 
     if "on" `elem` words then
-        (\(n,_:m) -> return $ useOn (intercalate " " n) (intercalate " " m))$ break (=="on") words
+        (\(n,_:m) -> return $ useOn (unwords n) (unwords m))$ break (=="on") words
     else
         fail "expected 'on'"
 

@@ -5,3 +5,7 @@ Room init
 Room fdsa
   name: "Other"
   description: "A sunlit room with a piano in it. The archway to the south is crumbled."
+Room asdf
+  name: "Locked"
+  description: "A pitch black room."
+  exits: [("w","fdsa")]
