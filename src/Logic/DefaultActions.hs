@@ -86,7 +86,16 @@ viewInv = do
                 else
                     ""
 
+runEvent :: UseEvent GameState -> Item -> Entity GameState -> GameAction ()
+runEvent (UnlockDoor key target) item entity 
+    | key == item = do
+        r <- use (player.location)
+        removeEntity r entity
+    | otherwise = lift $ putStrLn "This doesn't fit!"
+
 useOn :: String -> String -> GameAction ()
 useOn ti te = withEntity te $ \e -> 
-    withItem ti $ \i ->
-        lift $ putStrLn "I sure can use that!"
+    withItem ti $ \i -> 
+        case (e^.kind.accepts) M.!? i of
+            Nothing -> lift $ putStrLn $ "I see no way to use " ++ ti ++ " on " ++ te ++ "!"
+            Just event -> runEvent event i e

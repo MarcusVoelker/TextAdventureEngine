@@ -18,6 +18,12 @@ import Data.List
 import qualified Data.Map as M
 import Data.Maybe
 
+accept :: M.Map String (Room s) -> M.Map String Item -> String -> String -> Maybe (Item,UseEvent s)
+accept rs is rName iName = do
+    r <- rs M.!? rName
+    i <- is M.!? iName
+    return (i,UnlockDoor i r)
+
 entity :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] (Maybe (Room s),EntityKind s)
 entity rs is = do
     (Object T.Entity idt ps) <- object
@@ -26,7 +32,7 @@ entity rs is = do
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
     (ListProp acs) <- return $ fromMaybe (ListProp []) (lookup "accepts" ps)
-    let accepts = M.fromList $ map (\(PairProp (SProp i, PairProp (SProp "unlock", SProp r))) -> undefined) acs 
+    let accepts = M.fromList $ mapMaybe (\(PairProp (SProp i, PairProp (SProp "unlock", SProp r))) -> accept rs is r i) acs 
     return (room,EntityKind idt name description True item accepts)
 
 entities :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] [(Maybe (Room s),EntityKind s)]
