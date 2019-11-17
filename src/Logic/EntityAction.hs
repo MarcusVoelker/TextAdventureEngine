@@ -3,6 +3,7 @@ module Logic.EntityAction where
 import Logic.Entity
 import Logic.GameState
 import Logic.Interaction
+import Logic.Response
 
 import Map.Room
 
@@ -21,7 +22,7 @@ data EntityState = EntityState {
 
 makeFields ''EntityState
 
-type EntityAction a = StateT EntityState IO a
+type EntityAction a = StateT EntityState Responding a
 
 liftE :: Entity GameState -> EntityAction a -> GameAction a
 liftE e = zoom $ lens 

@@ -4,6 +4,7 @@ import Logic.GameState
 import Logic.Player
 import Logic.Item
 import Logic.Entity
+import Logic.Response
 
 import Map.Room
 
@@ -14,7 +15,7 @@ import Control.Monad.Trans.State
 import Data.List
 import qualified Data.Map as M
 
-type GameAction a = StateT GameState IO a
+type GameAction a = StateT GameState Responding a
 
 getFreeIdt :: GameAction Int
 getFreeIdt = do

@@ -5,6 +5,7 @@ import Logic.GameState
 import Logic.Interaction
 import Logic.Player
 import Logic.Item
+import Logic.Response
 
 import Map.Room
 import Thing
@@ -21,11 +22,11 @@ look :: GameAction ()
 look = do
     s <- get
     r <- use (player.location)
-    lift $ putStrLn $ (r^.description) s
+    respondText $ (r^.description) s
     es <- M.findWithDefault [] r <$> use entities 
-    unless (null es) $ lift $ do
-        putStrLn "\nYou see here:"
-        forM_ es $ \e -> putStrLn $ "    " ++ (e^.name)
+    unless (null es) $ do
+        respondText "\nYou see here:"
+        forM_ es $ \e -> respondText $ "    " ++ (e^.name)
 
 findEntity :: String -> GameAction (Maybe (Entity GameState))
 findEntity t = do
@@ -37,7 +38,7 @@ withEntity :: String -> (Entity GameState -> GameAction ()) -> GameAction ()
 withEntity t a = do
     e <- findEntity t
     case e of 
-        Nothing -> lift (putStrLn ("I cannot see any " ++ t ++ "!"))
+        Nothing -> respondText $ "I cannot see any " ++ t ++ "!"
         Just e -> a e
 
 findItem :: String -> GameAction (Maybe Item)
@@ -49,15 +50,15 @@ withItem :: String -> (Item -> GameAction ()) -> GameAction ()
 withItem t a = do
     i <- findItem t
     case i of 
-        Nothing -> lift (putStrLn ("I am not carrying any " ++ t ++ "!"))
+        Nothing -> respondText $ "I am not carrying any " ++ t ++ "!"
         Just i -> a i
 
 lookAt :: String -> GameAction ()
-lookAt t = withEntity t $ \e -> lift $ putStrLn $ e^.description
+lookAt t = withEntity t $ \e -> respondText $ e^.description
 
 takeItem :: String -> GameAction ()
 takeItem t = withEntity t $ \e -> case e^.kind.item of 
-    Nothing -> lift $ putStrLn $ "I cannot pick up " ++ t ++ "!"
+    Nothing -> respondText $ "I cannot pick up " ++ t ++ "!"
     Just i -> do 
         r <- use (player.location)
         removeEntity r e 
@@ -68,7 +69,7 @@ go e = do
     s <- get
     r <- use (player.location)
     case (r^.getExit) s e of
-        Left err -> lift $ putStrLn err
+        Left err -> respondText err
         Right r' -> do
             (player.location) .= r'
             look
@@ -76,26 +77,26 @@ go e = do
 viewInv :: GameAction ()
 viewInv = do
     inv <- use (player.inventory)
-    lift $ 
-        if M.null inv then
-            putStrLn "I am carrying nothing."
-        else
-            flip M.foldMapWithKey inv $ \k v -> putStrLn $ "    " ++ (k^.name) ++
-                if k^.stackable then 
-                    ": " ++ show v
-                else
-                    ""
+    if M.null inv then
+        respondText "I am carrying nothing."
+    else
+        responds $ flip M.foldMapWithKey inv $ \k v -> [TextResponse $ "    " ++ (k^.name) ++
+            if k^.stackable then 
+                ": " ++ show v
+            else
+                ""
+            ]
 
 runEvent :: UseEvent GameState -> Item -> Entity GameState -> GameAction ()
 runEvent (UnlockDoor key target) item entity 
     | key == item = do
         r <- use (player.location)
         removeEntity r entity
-    | otherwise = lift $ putStrLn "This doesn't fit!"
+    | otherwise = respondText "This doesn't fit!"
 
 useOn :: String -> String -> GameAction ()
 useOn ti te = withEntity te $ \e -> 
     withItem ti $ \i -> 
         case (e^.kind.accepts) M.!? i of
-            Nothing -> lift $ putStrLn $ "I see no way to use " ++ ti ++ " on " ++ te ++ "!"
+            Nothing -> respondText $ "I see no way to use " ++ ti ++ " on " ++ te ++ "!"
             Just event -> runEvent event i e

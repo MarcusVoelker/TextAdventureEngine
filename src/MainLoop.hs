@@ -8,6 +8,7 @@ import Parser.Tokenizer
 import Logic.GameState
 import Logic.DefaultActions
 import Logic.Interaction
+import Logic.Response
 import Map.Room
 import Sound.Engine
 import Engine
@@ -28,7 +29,7 @@ fullParser r e i = do
     iMap <- fst <$> pFunc (tokenizer >>> blocker >>> items) i
     es <- fst <$> pFunc (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap iMap) e
     let initial = initialState (fromJust $ M.lookup "init" rMap) []
-    return $ execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
+    return $ executeResponses $ execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
 runGame :: IO ()
 runGame = withEngine soundEngine $ do
@@ -37,6 +38,14 @@ runGame = withEngine soundEngine $ do
     itemCode <- readFile "app/items.dat"
     run (fullParser roomCode entityCode itemCode) (>>=mainLoop) putStrLn
 
+executeResponse :: GameState -> Response -> IO GameState
+executeResponse gs (TextResponse s) = do
+    putStrLn s 
+    return gs
+
+executeResponses :: Responding GameState -> IO GameState
+executeResponses (Responding responses gs) = foldM executeResponse gs responses
+
 mainLoop :: GameState -> IO ()
 mainLoop s = do
     putStr "> "
@@ -44,7 +53,7 @@ mainLoop s = do
     command <- getLine
     unless (command == "quit") $
         parse action command (\c -> do
-            s' <- execStateT c s
+            s' <- executeResponses $ execStateT c s
             mainLoop s') (const $ do
                 putStrLn "I did not understand that."
                 mainLoop s
