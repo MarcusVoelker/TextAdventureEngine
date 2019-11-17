@@ -12,6 +12,7 @@ import Logic.Response
 import Map.Room
 import Sound.Engine
 import Engine
+import Renderer.Renderer
 
 import Text.LParse.Parser
 
@@ -32,19 +33,11 @@ fullParser r e i = do
     return $ executeResponses $ execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
 runGame :: IO ()
-runGame = withEngine soundEngine $ do
+runGame = withEngine (soundEngine <> renderEngine) $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
     itemCode <- readFile "app/items.dat"
     run (fullParser roomCode entityCode itemCode) (>>=mainLoop) putStrLn
-
-executeResponse :: GameState -> Response -> IO GameState
-executeResponse gs (TextResponse s) = do
-    putStrLn s 
-    return gs
-
-executeResponses :: Responding GameState -> IO GameState
-executeResponses (Responding responses gs) = foldM executeResponse gs responses
 
 mainLoop :: GameState -> IO ()
 mainLoop s = do
@@ -55,6 +48,6 @@ mainLoop s = do
         parse action command (\c -> do
             s' <- executeResponses $ execStateT c s
             mainLoop s') (const $ do
-                putStrLn "I did not understand that."
-                mainLoop s
+                s' <- executeResponse s $ TextResponse "I did not understand that."
+                mainLoop s'
                 )
