@@ -20,11 +20,11 @@ import Control.Arrow
 import Control.DoubleContinuations
 import Control.Monad
 import Control.Monad.Trans.State
+import Control.Monad.Trans.Class
 import Data.Maybe
 import qualified Data.Map.Strict as M
-import System.IO (hFlush, stdout)
 
-fullParser :: String -> String -> String -> DCont r String (IO GameState)
+fullParser :: String -> String -> String -> DCont r String (Rendering GameState)
 fullParser r e i = do
     rMap <- fst <$> pFunc (tokenizer >>> blocker >>> rooms) r
     iMap <- fst <$> pFunc (tokenizer >>> blocker >>> items) i
@@ -37,13 +37,12 @@ runGame = withEngine (soundEngine <> renderEngine) $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
     itemCode <- readFile "app/items.dat"
-    run (fullParser roomCode entityCode itemCode) (>>=mainLoop) putStrLn
+    run (fullParser roomCode entityCode itemCode) (runRenderer.(>>= mainLoop)) putStrLn
 
-mainLoop :: GameState -> IO ()
+mainLoop :: GameState -> Rendering ()
 mainLoop s = do
-    putStr "> "
-    hFlush stdout
-    command <- getLine
+    render s
+    command <- lift getLine
     unless (command == "quit") $
         parse action command (\c -> do
             s' <- executeResponses $ execStateT c s
