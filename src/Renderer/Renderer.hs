@@ -5,6 +5,7 @@ import Logic.Response
 
 import Engine
 
+import Control.Exception
 import Control.Lens
 import Control.Monad
 import Control.Monad.Trans.Class
@@ -53,10 +54,16 @@ executeResponse gs (TextResponse s) = do
 executeResponses :: Responding GameState -> Rendering GameState
 executeResponses (Responding responses gs) = foldM executeResponse gs responses
 
+fallback :: SomeException -> IO (Maybe (Int,Int))
+fallback = const $ return $ return $ (13,160)
+
+safeGetTerminalSize :: IO (Maybe (Int,Int))
+safeGetTerminalSize = catch getTerminalSize fallback
+
 render :: GameState -> Rendering ()
 render gs = do
     lift clearScreen
-    size <- lift getTerminalSize
+    size <- lift safeGetTerminalSize
     th <- use textHistory
     lift $ case size of
         Just (y,x) -> do

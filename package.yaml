@@ -27,7 +27,7 @@ dependencies:
 - bytestring
 - filepath
 - lens
-- ansi-terminal >= 0.9
+- ansi-terminal >= 0.10
 
 library:
   source-dirs: src
