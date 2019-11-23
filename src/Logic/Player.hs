@@ -10,7 +10,7 @@ import Control.Lens
 import qualified Data.Map as M
 
 data Player s = Player {
-    _playerLocation :: Room s,
+    _playerLocation :: Room,
     _playerInventory :: M.Map Item Int
 }
 

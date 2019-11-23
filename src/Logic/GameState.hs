@@ -11,15 +11,15 @@ import qualified Data.Map as M
 data GameState = GameState {
     _gameStatePlayer :: Player GameState,
     _gameStateVariables :: M.Map String Int,
-    _gameStateEntities :: M.Map (Room GameState) [Entity GameState],
+    _gameStateEntities :: M.Map Room [Entity GameState],
     _gameStateNextIdt :: Int,
-    _gameStateDynamicDoors :: M.Map (Room GameState) [(String, Room GameState)],
-    _gameStateDynamicDescription :: M.Map (Room GameState) String
+    _gameStateDynamicDoors :: M.Map Room [(String, Room)],
+    _gameStateDynamicDescription :: M.Map Room String
 }
 
 makeFields ''GameState
 
-initialState :: Room GameState -> [String] -> GameState
+initialState :: Room -> [String] -> GameState
 initialState r vs = 
     GameState 
         (Player r M.empty) 

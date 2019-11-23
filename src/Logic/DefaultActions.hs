@@ -19,7 +19,7 @@ import Data.List
 import qualified Data.Map as M
 import Data.Maybe
 
-roomDescription :: Room GameState -> GameAction String
+roomDescription :: Room -> GameAction String
 roomDescription r = do
     desc <- (M.!? r) <$> use dynamicDescription
     return $ fromMaybe (r^.description) desc
@@ -69,7 +69,7 @@ takeItem t = withEntity t $ \e -> case e^.kind.item of
         removeEntity r e 
         addToInventory i
 
-exit :: Room GameState -> String -> GameAction (Either String (Room GameState))
+exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do
     dyns <- use dynamicDoors
     case dyns M.!? r >>= lookup s of
@@ -99,7 +99,7 @@ viewInv = do
                 ""
             ]
 
-addDoor :: Room GameState -> String -> Room GameState -> GameAction ()
+addDoor :: Room -> String -> Room -> GameAction ()
 addDoor s n t = dynamicDoors %= M.insertWith (++) s [(n,t)]
 
 runEvent :: UseEvent GameState -> Item -> Entity GameState -> GameAction ()

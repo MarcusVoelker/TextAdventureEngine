@@ -15,7 +15,7 @@ import Data.List
 import qualified Data.Map as M
 
 data EntityState = EntityState {
-    _entityStateLocation :: Room GameState,
+    _entityStateLocation :: Room,
     _entityStateVarState :: M.Map String Int,
     _entityStateGlobalState :: M.Map String Int
 }

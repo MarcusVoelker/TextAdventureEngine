@@ -11,7 +11,7 @@ import qualified Data.Map as M
 
 data UseEvent s = UnlockDoor {
     _useEventItem :: Item,
-    _useEventNewRoom :: Room s
+    _useEventNewRoom :: Room
 }
 
 data EntityKind s = EntityKind {
@@ -27,7 +27,7 @@ data Entity s = Entity {
     _entityIdt :: Int,
     _entityKind :: EntityKind s,
     _entityState :: M.Map String Int,
-    _entityLocation :: Room s
+    _entityLocation :: Room
 }
 
 instance Eq (EntityKind s) where

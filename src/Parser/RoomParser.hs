@@ -18,7 +18,7 @@ import Data.List
 import Data.Maybe
 import qualified Data.Map.Strict as M
 
-room :: M.Map String (Room s) -> Parser r [Token] (Room s)
+room :: M.Map String Room -> Parser r [Token] Room
 room rs = do
     (Object T.Room idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
@@ -31,7 +31,7 @@ room rs = do
         description
         (defaultGetExit (`lookup` exs))
 
-rooms :: Parser r [Token] (M.Map String (Room s))
+rooms :: Parser r [Token] (M.Map String Room)
 rooms = pfix $ \rs -> do
     list <- many (room rs)
     return $ M.fromList $ map (\r -> (r^.idt,r)) list
