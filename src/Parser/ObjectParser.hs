@@ -8,7 +8,7 @@ import Text.LParse.Prebuilt
 
 import Control.Applicative
 
-data Property = TagProp | SProp String | ListProp [Property] | PairProp (Property,Property) deriving Eq
+data Property = TagProp | SProp String | ListProp [Property] | PairProp (Property,Property) deriving (Eq,Show)
 
 data Object = Object {
     objType :: Keyword,

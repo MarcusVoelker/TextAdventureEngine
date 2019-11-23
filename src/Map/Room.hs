@@ -7,8 +7,8 @@ import Control.Lens
 data Room s = Room {
     _roomIdt :: String,
     _roomName :: String,
-    _roomDescription :: s -> String,
-    _roomGetExit :: s -> String -> Either String (Room s)
+    _roomDescription :: String,
+    _roomGetExit :: String -> Either String (Room s)
 }
 
 makeFields ''Room
@@ -19,8 +19,8 @@ instance Eq (Room s) where
 instance Ord (Room s) where
     compare a b = compare (a^.idt) (b^.idt)
 
-defaultGetExit :: (s -> String -> Maybe (Room s)) -> s -> String -> Either String (Room s)
-defaultGetExit ge s e = 
-    case ge s e of 
+defaultGetExit :: (String -> Maybe (Room s)) -> String -> Either String (Room s)
+defaultGetExit ge e = 
+    case ge e of 
         Nothing -> Left $ if e `elem` map return "nsweud" then "I see no way to go " ++ e ++ "." else "I don't know '" ++ e ++ "'."
         Just r' -> Right r'

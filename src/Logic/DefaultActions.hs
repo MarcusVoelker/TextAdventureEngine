@@ -17,12 +17,17 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Data.List
 import qualified Data.Map as M
+import Data.Maybe
+
+roomDescription :: Room GameState -> GameAction String
+roomDescription r = do
+    desc <- (M.!? r) <$> use dynamicDescription
+    return $ fromMaybe (r^.description) desc
 
 look :: GameAction ()
 look = do
-    s <- get
-    r <- use (player.location)
-    respondText $ (r^.description) s
+    r <- use (player.location) 
+    roomDescription r >>= respondText
     es <- M.findWithDefault [] r <$> use entities 
     unless (null es) $ do
         respondText "\nYou see here:"
@@ -64,15 +69,22 @@ takeItem t = withEntity t $ \e -> case e^.kind.item of
         removeEntity r e 
         addToInventory i
 
+exit :: Room GameState -> String -> GameAction (Either String (Room GameState))
+exit r s = do
+    dyns <- use dynamicDoors
+    case dyns M.!? r >>= lookup s of
+        Just t -> return $ Right r
+        Nothing -> case (r^.getExit) s of
+            Right r' -> return $ Right r'
+            Left err -> return $ Left err
+
 go :: String -> GameAction ()
 go e = do
-    s <- get
     r <- use (player.location)
-    case (r^.getExit) s e of
+    res <- exit r e
+    case res of
+        Right r' -> (player.location) .= r' >> look
         Left err -> respondText err
-        Right r' -> do
-            (player.location) .= r'
-            look
 
 viewInv :: GameAction ()
 viewInv = do
@@ -87,11 +99,15 @@ viewInv = do
                 ""
             ]
 
+addDoor :: Room GameState -> String -> Room GameState -> GameAction ()
+addDoor s n t = dynamicDoors %= M.insertWith (++) s [(n,t)]
+
 runEvent :: UseEvent GameState -> Item -> Entity GameState -> GameAction ()
 runEvent (UnlockDoor key target) item entity 
     | key == item = do
         r <- use (player.location)
         removeEntity r entity
+        addDoor r (entity^.name) target
     | otherwise = respondText "This doesn't fit!"
 
 useOn :: String -> String -> GameAction ()

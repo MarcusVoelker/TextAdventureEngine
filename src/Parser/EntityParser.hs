@@ -32,7 +32,7 @@ entity rs is = do
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
     (ListProp acs) <- return $ fromMaybe (ListProp []) (lookup "accepts" ps)
-    let accepts = M.fromList $ mapMaybe (\(PairProp (SProp i, PairProp (SProp "unlock", SProp r))) -> accept rs is r i) acs 
+    let accepts = M.fromList $ mapMaybe (\(PairProp (SProp i, PairProp (SProp "unlockDoor", SProp r))) -> accept rs is r i) acs 
     return (room,EntityKind idt name description True item accepts)
 
 entities :: M.Map String (Room s) -> M.Map String Item -> Parser r [Token] [(Maybe (Room s),EntityKind s)]

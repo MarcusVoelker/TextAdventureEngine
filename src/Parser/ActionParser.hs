@@ -44,4 +44,4 @@ action = lookAction
     <|> takeAction
     <|> useAction
     <|> (consume "inventory" >> return viewInv << eoi)
-    <|> (go <$> (consume "go " >> word << eoi))
+    <|> (go <$> (consume "go " >> full << eoi))

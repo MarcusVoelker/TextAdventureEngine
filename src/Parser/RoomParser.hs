@@ -28,8 +28,8 @@ room rs = do
     return $ Room 
         idt
         name
-        (const description)
-        (defaultGetExit (\_ n -> lookup n exs))
+        description
+        (defaultGetExit (`lookup` exs))
 
 rooms :: Parser r [Token] (M.Map String (Room s))
 rooms = pfix $ \rs -> do

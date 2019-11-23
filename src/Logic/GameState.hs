@@ -12,7 +12,9 @@ data GameState = GameState {
     _gameStatePlayer :: Player GameState,
     _gameStateVariables :: M.Map String Int,
     _gameStateEntities :: M.Map (Room GameState) [Entity GameState],
-    _gameStateNextIdt :: Int
+    _gameStateNextIdt :: Int,
+    _gameStateDynamicDoors :: M.Map (Room GameState) [(String, Room GameState)],
+    _gameStateDynamicDescription :: M.Map (Room GameState) String
 }
 
 makeFields ''GameState
@@ -24,3 +26,5 @@ initialState r vs =
         (M.fromList $ map (,0) vs) 
         M.empty
         0
+        M.empty
+        M.empty
