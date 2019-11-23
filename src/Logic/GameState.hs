@@ -11,7 +11,7 @@ import qualified Data.Map as M
 data GameState = GameState {
     _gameStatePlayer :: Player GameState,
     _gameStateVariables :: M.Map String Int,
-    _gameStateEntities :: M.Map Room [Entity GameState],
+    _gameStateEntities :: M.Map Room [Entity],
     _gameStateNextIdt :: Int,
     _gameStateDynamicDoors :: M.Map Room [(String, Room)],
     _gameStateDynamicDescription :: M.Map Room String

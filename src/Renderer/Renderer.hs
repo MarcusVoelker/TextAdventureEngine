@@ -75,7 +75,7 @@ executeResponses :: Responding GameState -> Rendering GameState
 executeResponses (Responding responses gs) = foldM executeResponse gs responses
 
 fallback :: SomeException -> IO (Maybe (Int,Int))
-fallback = const $ return $ return $ (14,174)
+fallback = const $ return $ return (14,174)
 
 safeGetTerminalSize :: IO (Maybe (Int,Int))
 safeGetTerminalSize = catch getTerminalSize fallback
@@ -85,7 +85,7 @@ render gs = do
     lift clearScreen
     wins <- use windows
     forM_ wins $ renderWindow gs
-    size <- lift $ safeGetTerminalSize
+    size <- lift safeGetTerminalSize
     lift $ case size of
         Just (y,x) -> setCursorPosition (y-2) 2
         Nothing -> return ()

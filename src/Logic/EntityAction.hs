@@ -24,7 +24,7 @@ makeFields ''EntityState
 
 type EntityAction a = StateT EntityState Responding a
 
-liftE :: Entity GameState -> EntityAction a -> GameAction a
+liftE :: Entity -> EntityAction a -> GameAction a
 liftE e = zoom $ lens 
     (\gs -> EntityState (e^.location) (e^.state) (gs^.variables))
     (\gs es -> gs 

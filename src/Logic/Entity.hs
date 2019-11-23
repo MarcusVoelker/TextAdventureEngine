@@ -9,44 +9,44 @@ import Control.Lens
 import Control.Lens.Lens
 import qualified Data.Map as M
 
-data UseEvent s = UnlockDoor {
+data UseEvent = UnlockDoor {
     _useEventItem :: Item,
     _useEventNewRoom :: Room
 }
 
-data EntityKind s = EntityKind {
+data EntityKind = EntityKind {
     _entityKindIdt :: String,
     _entityKindName :: String,
     _entityKindDescription :: String,
     _entityKindVisible :: Bool,
     _entityKindItem :: Maybe Item,
-    _entityKindAccepts :: M.Map Item (UseEvent s)
+    _entityKindAccepts :: M.Map Item UseEvent
 }
 
-data Entity s = Entity {
+data Entity = Entity {
     _entityIdt :: Int,
-    _entityKind :: EntityKind s,
+    _entityKind :: EntityKind,
     _entityState :: M.Map String Int,
     _entityLocation :: Room
 }
 
-instance Eq (EntityKind s) where
+instance Eq EntityKind where
     a == b = a^.idt == b^.idt
 
-instance Eq (Entity s) where
+instance Eq Entity where
     a == b = a^.idt == b^.idt
 
 makeFields ''UseEvent
 makeFields ''EntityKind
 makeFields ''Entity
 
-instance HasName (Entity s) String where
+instance HasName Entity String where
     name = _entityNameLens
-instance HasDescription (Entity s) String where
+instance HasDescription Entity String where
     description = _entityDescriptionLens
 
-_entityNameLens :: Lens' (Entity s) String
+_entityNameLens :: Lens' Entity String
 _entityNameLens = kind.name
 
-_entityDescriptionLens :: Lens' (Entity s) String
+_entityDescriptionLens :: Lens' Entity String
 _entityDescriptionLens = kind.description

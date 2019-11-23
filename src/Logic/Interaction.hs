@@ -23,7 +23,7 @@ getFreeIdt = do
     nextIdt %= (+1)
     return i
 
-instantiateEntity :: Room -> EntityKind GameState -> GameAction ()
+instantiateEntity :: Room -> EntityKind -> GameAction ()
 instantiateEntity r k = do
     i <- getFreeIdt
     entities %= M.insertWith (++) r [Entity i k M.empty r]
@@ -31,5 +31,5 @@ instantiateEntity r k = do
 addToInventory :: Item -> GameAction ()
 addToInventory i = player.inventory %= M.insertWith (+) i 1
 
-removeEntity :: Room -> Entity GameState -> GameAction ()
+removeEntity :: Room -> Entity -> GameAction ()
 removeEntity r e = entities %= M.adjust (delete e) r

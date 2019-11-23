@@ -33,13 +33,13 @@ look = do
         respondText "\nYou see here:"
         forM_ es $ \e -> respondText $ "    " ++ (e^.name)
 
-findEntity :: String -> GameAction (Maybe (Entity GameState))
+findEntity :: String -> GameAction (Maybe Entity)
 findEntity t = do
     r <- use (player.location)
     es <- M.findWithDefault [] r <$> use entities 
     return $ find (\e -> e^.name == t) es
 
-withEntity :: String -> (Entity GameState -> GameAction ()) -> GameAction ()
+withEntity :: String -> (Entity -> GameAction ()) -> GameAction ()
 withEntity t a = do
     e <- findEntity t
     case e of 
@@ -102,7 +102,7 @@ viewInv = do
 addDoor :: Room -> String -> Room -> GameAction ()
 addDoor s n t = dynamicDoors %= M.insertWith (++) s [(n,t)]
 
-runEvent :: UseEvent GameState -> Item -> Entity GameState -> GameAction ()
+runEvent :: UseEvent -> Item -> Entity -> GameAction ()
 runEvent (UnlockDoor key target) item entity 
     | key == item = do
         r <- use (player.location)
