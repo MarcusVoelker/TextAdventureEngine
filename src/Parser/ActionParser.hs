@@ -29,6 +29,13 @@ takeAction = do
     eoi 
     return l 
 
+talkAction :: Parser r String (GameAction ())
+talkAction = do
+    consume "talk" 
+    l <- talkTo <$> (some (consumeSingle ' ') >> full)
+    eoi 
+    return l 
+
 useAction :: Parser r String (GameAction ())
 useAction = do
     consume "use "
@@ -42,6 +49,7 @@ useAction = do
 action :: Parser r String (GameAction ())
 action = lookAction
     <|> takeAction
+    <|> talkAction
     <|> useAction
     <|> (consume "inventory" >> return viewInv << eoi)
     <|> (go <$> (consume "go " >> full << eoi))

@@ -42,6 +42,11 @@ data RenderingException = RenderingException deriving (Show)
 
 instance Exception RenderingException
 
+openTopWindow :: Int -> Int -> Int -> Int -> View -> Rendering ()
+openTopWindow x y w h v = do
+    hand <- (+1) . maximum . M.keys <$> use windows
+    let win = Window hand x y w h v
+    windows %= M.insert hand win
 
 renderWindow :: GameState -> Window -> Rendering ()
 renderWindow gs win = do
@@ -63,12 +68,16 @@ renderWindow gs win = do
         putStr bLine
         let contents = v gs rs
         forM_ (dropWhile ((<1).fst) $ zip [(y+h-1-length contents)..] contents) $ \(i,s) -> do
-            setCursorPosition i 2
+            setCursorPosition i (x+2)
             putStr s
 
 executeResponse :: GameState -> Response -> Rendering GameState
 executeResponse gs (TextResponse s) = do
     textHistory %= (++lines s)
+    return gs
+executeResponse gs (InitiateDialogueResponse d) = do
+    Just (y,x) <- lift safeGetTerminalSize
+    openTopWindow 2 2 (x-4) (y-8) $ \_ _ -> ["Dialogue!"]
     return gs
 
 executeResponses :: Responding GameState -> Rendering GameState
@@ -97,8 +106,9 @@ initialRendererState = do
     size <- safeGetTerminalSize
     case size of
         Just (y,x) -> return $ RendererState [] $ M.fromList [
-            (1,Window 1 0 0 x (y-2) (\_ rs -> rs^.textHistory)),
-            (0,Window 0 0 (y-3) x 3 (\_ _ -> [""]))]
+            (0,Window 0 0 (y-3) x 3 (\_ _ -> [""])),
+            (1,Window 1 0 0 x (y-3) (\_ rs -> rs^.textHistory))
+            ]
         Nothing -> throw RenderingException
 
 runRenderer :: Rendering () -> IO ()

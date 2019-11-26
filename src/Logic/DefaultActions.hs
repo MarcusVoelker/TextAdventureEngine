@@ -69,6 +69,9 @@ takeItem t = withEntity t $ \e -> case e^.kind.item of
         removeEntity r e 
         addToInventory i
 
+talkTo :: String -> GameAction ()
+talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse undefined
+
 exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do
     dyns <- use dynamicDoors

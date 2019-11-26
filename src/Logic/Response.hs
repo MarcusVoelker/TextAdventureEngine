@@ -1,5 +1,7 @@
 module Logic.Response where
 
+import Logic.Dialogue
+
 import Control.Applicative
 import Control.Lens
 import Control.Monad
@@ -10,7 +12,9 @@ data Response = TextResponse {
         _responseText :: String
     } | InventoryResponse | OpenMenuResponse {
         _responseMenuName :: String
-    } | CloseMenuResponse
+    } | CloseMenuResponse | InitiateDialogueResponse {
+        _responseDialogueTree :: DialogueTree
+    }
 
 makeFields ''Response
 
