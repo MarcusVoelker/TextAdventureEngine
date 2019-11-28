@@ -1,5 +1,6 @@
 module Renderer.Renderer where
 
+import Logic.Dialogue
 import Logic.GameState
 import Logic.Response
 import Logic.StateStack
@@ -72,17 +73,17 @@ renderWindow gs win = do
             setCursorPosition i (x+2)
             putStr s
 
-executeResponse :: GameState -> Response -> Rendering GameState
-executeResponse gs (TextResponse s) = do
+executeResponse :: StateStack -> Response -> Rendering StateStack
+executeResponse ss (TextResponse s) = do
     textHistory %= (++lines s)
-    return gs
-executeResponse gs (InitiateDialogueResponse d) = do
+    return ss
+executeResponse ss (InitiateDialogueResponse d) = do
     Just (y,x) <- lift safeGetTerminalSize
-    openTopWindow 2 2 (x-4) (y-8) $ \_ _ -> ["Dialogue!"]
-    return gs
+    openTopWindow 2 2 (x-4) (y-8) $ \_ _ -> [d^.response]
+    return $ openContext (DialogueState d) ss
 
-executeResponses :: Responding GameState -> Rendering GameState
-executeResponses (Responding responses gs) = foldM executeResponse gs responses
+executeResponses :: Responding StateStack -> Rendering StateStack
+executeResponses (Responding responses ss) = foldM executeResponse ss responses
 
 fallback :: SomeException -> IO (Maybe (Int,Int))
 fallback = const $ return $ return (14,174)
@@ -90,8 +91,9 @@ fallback = const $ return $ return (14,174)
 safeGetTerminalSize :: IO (Maybe (Int,Int))
 safeGetTerminalSize = catch getTerminalSize fallback
 
-render :: GameState -> Rendering ()
-render gs = do
+render :: StateStack -> Rendering ()
+render ss = do
+    let gs = ss^.bottom
     lift clearScreen
     wins <- use windows
     forM_ wins $ renderWindow gs

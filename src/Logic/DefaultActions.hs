@@ -1,5 +1,6 @@
 module Logic.DefaultActions where
 
+import Logic.Dialogue
 import Logic.Entity
 import Logic.GameState
 import Logic.Interaction
@@ -70,7 +71,7 @@ takeItem t = withEntity t $ \e -> case e^.kind.item of
         addToInventory i
 
 talkTo :: String -> GameAction ()
-talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse undefined
+talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse (DialogueTree "Hello there!" undefined)
 
 exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do

@@ -12,9 +12,9 @@ data Response = TextResponse {
         _responseText :: String
     } | InventoryResponse | OpenMenuResponse {
         _responseMenuName :: String
-    } | CloseMenuResponse | InitiateDialogueResponse {
+    } | InitiateDialogueResponse {
         _responseDialogueTree :: DialogueTree
-    }
+    } | LeaveContextResponse | QuitResponse
 
 makeFields ''Response
 
@@ -26,7 +26,7 @@ data Responding a = Responding {
 makeFields ''Responding
 
 instance Functor Responding where
-    fmap f x = x >>= (return.f)
+    fmap f x = x >>= return . f
 
 instance Applicative Responding where
     pure = return
