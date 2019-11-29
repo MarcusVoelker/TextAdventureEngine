@@ -26,7 +26,8 @@ data Window = Window {
     _windowTop :: Int,
     _windowWidth :: Int,
     _windowHeight :: Int,
-    _windowView :: View
+    _windowView :: View,
+    _windowContext :: Int
 }
 
 data RendererState = RendererState {
@@ -44,16 +45,14 @@ data RenderingException = RenderingException deriving (Show)
 
 instance Exception RenderingException
 
-openTopWindow :: Int -> Int -> Int -> Int -> View -> Rendering ()
-openTopWindow x y w h v = do
+openTopWindow :: Int -> Int -> Int -> Int -> View -> Int -> Rendering ()
+openTopWindow x y w h v c = do
     hand <- (+1) . maximum . M.keys <$> use windows
-    let win = Window hand x y w h v
+    let win = Window hand x y w h v c
     windows %= M.insert hand win
 
-closeTopWindow :: Rendering ()
-closeTopWindow = do
-    hand <- maximum . M.keys <$> use windows
-    windows %= M.delete hand
+closeContextWindows :: Int -> Rendering ()
+closeContextWindows c = windows %= M.filter (\w -> w^.context /= c)
 
 renderWindow :: GameState -> Window -> Rendering ()
 renderWindow gs win = do
@@ -84,10 +83,10 @@ executeResponse ss (TextResponse s) = do
     return ss
 executeResponse ss (InitiateDialogueResponse d) = do
     Just (y,x) <- lift safeGetTerminalSize
-    openTopWindow 2 2 (x-4) (y-8) $ \_ _ -> [d^.response]
+    openTopWindow 2 2 (x-4) (y-8) (\_ _ -> [d^.response]) (contextCount ss + 1)
     return $ openContext (DialogueState d) ss
 executeResponse ss LeaveContextResponse = do
-    closeTopWindow
+    closeContextWindows $ contextCount ss
     return $ closeContext ss
 
 executeResponses :: Responding StateStack -> Rendering StateStack
@@ -117,8 +116,8 @@ initialRendererState = do
     size <- safeGetTerminalSize
     case size of
         Just (y,x) -> return $ RendererState [] $ M.fromList [
-            (0,Window 0 0 (y-3) x 3 (\_ _ -> [""])),
-            (1,Window 1 0 0 x (y-3) (\_ rs -> rs^.textHistory))
+            (0,Window 0 0 (y-3) x 3 (\_ _ -> [""]) 0),
+            (1,Window 1 0 0 x (y-3) (\_ rs -> rs^.textHistory) 0)
             ]
         Nothing -> throw RenderingException
 

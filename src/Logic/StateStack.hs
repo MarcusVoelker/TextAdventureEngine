@@ -40,5 +40,8 @@ openContext ns ss = ss&stack %~ (ns:)
 closeContext :: StateStack -> StateStack
 closeContext ss = ss&stack %~ tail
 
+contextCount :: StateStack -> Int
+contextCount ss = length $ ss^.stack
+
 tempAction :: String -> TempAction ()
 tempAction _ = respond LeaveContextResponse
