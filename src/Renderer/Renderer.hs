@@ -18,7 +18,7 @@ import System.IO (hFlush, stdout)
 
 type WHandle = Int
 
-type View = GameState -> RendererState -> [String]
+type View = StateStack -> RendererState -> [String]
 
 data Window = Window {
     _windowHandle :: WHandle,
@@ -54,8 +54,8 @@ openTopWindow x y w h v c = do
 closeContextWindows :: Int -> Rendering ()
 closeContextWindows c = windows %= M.filter (\w -> w^.context /= c)
 
-renderWindow :: GameState -> Window -> Rendering ()
-renderWindow gs win = do
+renderWindow :: StateStack -> Window -> Rendering ()
+renderWindow ss win = do
     let x = win^.left
     let y = win^.top
     let w = win^.width
@@ -72,7 +72,7 @@ renderWindow gs win = do
             putStr iLine
         setCursorPosition (y+h-1) x
         putStr bLine
-        let contents = v gs rs
+        let contents = v ss rs
         forM_ (dropWhile ((<1).fst) $ zip [(y+h-1-length contents)..] contents) $ \(i,s) -> do
             setCursorPosition i (x+2)
             putStr s
@@ -83,7 +83,7 @@ executeResponse ss (TextResponse s) = do
     return ss
 executeResponse ss (InitiateDialogueResponse d) = do
     Just (y,x) <- lift safeGetTerminalSize
-    openTopWindow 2 2 (x-4) (y-8) (\_ _ -> [d^.response]) (contextCount ss + 1)
+    openTopWindow 2 2 (x-4) (y-8) (\ss _ -> [head(ss^.stack)^.dialogue.response]) (contextCount ss + 1)
     return $ openContext (DialogueState d) ss
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
@@ -100,10 +100,9 @@ safeGetTerminalSize = catch getTerminalSize fallback
 
 render :: StateStack -> Rendering ()
 render ss = do
-    let gs = ss^.bottom
     lift clearScreen
     wins <- use windows
-    forM_ wins $ renderWindow gs
+    forM_ wins $ renderWindow ss
     size <- lift safeGetTerminalSize
     lift $ case size of
         Just (y,x) -> setCursorPosition (y-2) 2

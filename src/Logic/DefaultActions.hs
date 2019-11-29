@@ -71,7 +71,7 @@ takeItem t = withEntity t $ \e -> case e^.kind.item of
         addToInventory i
 
 talkTo :: String -> GameAction ()
-talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse (DialogueTree "Hello there!" undefined)
+talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse (DialogueTree "Hello there!" $ M.fromList [("bye",Nothing),("hi",Just (DialogueTree "Go away." $ M.singleton "bye" Nothing))])
 
 exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do
