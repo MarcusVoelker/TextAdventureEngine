@@ -36,3 +36,9 @@ noContext ss = null $ ss^.stack
 
 openContext :: StackedState -> StateStack -> StateStack
 openContext ns ss = ss&stack %~ (ns:)
+
+closeContext :: StateStack -> StateStack
+closeContext ss = ss&stack %~ tail
+
+tempAction :: String -> TempAction ()
+tempAction _ = respond LeaveContextResponse

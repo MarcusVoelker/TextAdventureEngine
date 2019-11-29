@@ -50,6 +50,11 @@ openTopWindow x y w h v = do
     let win = Window hand x y w h v
     windows %= M.insert hand win
 
+closeTopWindow :: Rendering ()
+closeTopWindow = do
+    hand <- maximum . M.keys <$> use windows
+    windows %= M.delete hand
+
 renderWindow :: GameState -> Window -> Rendering ()
 renderWindow gs win = do
     let x = win^.left
@@ -81,6 +86,9 @@ executeResponse ss (InitiateDialogueResponse d) = do
     Just (y,x) <- lift safeGetTerminalSize
     openTopWindow 2 2 (x-4) (y-8) $ \_ _ -> [d^.response]
     return $ openContext (DialogueState d) ss
+executeResponse ss LeaveContextResponse = do
+    closeTopWindow
+    return $ closeContext ss
 
 executeResponses :: Responding StateStack -> Rendering StateStack
 executeResponses (Responding responses ss) = foldM executeResponse ss responses

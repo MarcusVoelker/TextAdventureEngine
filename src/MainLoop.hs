@@ -51,5 +51,7 @@ mainLoop ss = do
                 (\c -> executeResponses $ execStateT (liftBottom c) ss)
                 (const $ executeResponse ss $ TextResponse "I did not understand that.")
             mainLoop ss'
-    else
-        undefined
+    else do
+        command <- lift getLine
+        ss' <- executeResponses $ execStateT (liftTemporary (tempAction command)) ss
+        mainLoop ss'
