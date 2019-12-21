@@ -27,11 +27,11 @@ dependencies:
 - bytestring
 - filepath
 - lens
-- ansi-terminal >= 0.10
+- ansi-terminal >= 0.10.2
 
 library:
   source-dirs: src
-  default-extensions: TupleSections, LambdaCase, TemplateHaskell, MultiParamTypeClasses, TypeSynonymInstances, FunctionalDependencies, FlexibleInstances
+  default-extensions: TupleSections, LambdaCase, TemplateHaskell, MultiParamTypeClasses, TypeSynonymInstances, FunctionalDependencies, FlexibleInstances, AllowAmbiguousTypes
 
 executables:
   TextAdventureEngine-exe:

@@ -13,7 +13,8 @@ import Logic.StateStack
 import Map.Room
 import Sound.Engine
 import Engine
-import Renderer.Renderer
+import Frontend.Frontend
+import Frontend.ANSIRenderer
 
 import Text.LParse.Parser
 
@@ -26,7 +27,7 @@ import Control.Monad.Trans.Class
 import Data.Maybe
 import qualified Data.Map.Strict as M
 
-fullParser :: String -> String -> String -> DCont r String (Rendering StateStack)
+fullParser :: (Renderer re) => String -> String -> String -> DCont r String (TAIO re StateStack)
 fullParser r e i = do
     rMap <- fst <$> pFunc (tokenizer >>> blocker >>> rooms) r
     iMap <- fst <$> pFunc (tokenizer >>> blocker >>> items) i
@@ -34,14 +35,17 @@ fullParser r e i = do
     let initial = initialState (fromJust $ M.lookup "init" rMap) []
     return $ executeResponses $ (\gs -> StateStack gs []) <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
-runGame :: IO ()
-runGame = withEngine (soundEngine <> renderEngine) $ do
+ansiRunGame :: IO ()
+ansiRunGame = withEngine soundEngine $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
     itemCode <- readFile "app/items.dat"
-    run (fullParser roomCode entityCode itemCode) (runRenderer.(>>= mainLoop)) putStrLn
+    run (fullParser roomCode entityCode itemCode) (runFrontend.(>>= ansiMainLoop)) putStrLn
 
-mainLoop :: StateStack -> Rendering ()
+ansiMainLoop :: StateStack -> TAIO ANSIRenderer ()
+ansiMainLoop = mainLoop
+
+mainLoop :: (Renderer r) => StateStack -> TAIO r ()
 mainLoop ss = do
     render ss
     if noContext ss then do
