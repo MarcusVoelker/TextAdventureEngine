@@ -28,6 +28,7 @@ dependencies:
 - filepath
 - lens
 - ansi-terminal >= 0.10.2
+- gloss
 
 library:
   source-dirs: src
