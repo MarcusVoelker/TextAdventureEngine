@@ -81,5 +81,5 @@ initialFrontendState (w,h) = FrontendState
 
 runFrontend :: (Int,Int) -> TAIO () -> IO ()
 runFrontend dims action = do 
-    irs <- initialFrontendState dims
+    let irs = initialFrontendState dims
     void $ execStateT action irs
