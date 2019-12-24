@@ -30,15 +30,22 @@ data Window = Window {
     _windowContext :: Int
 }
 
+data FrontendSettings = FrontendSettings {
+    _frontendSettingsDimensions :: (Int,Int),
+    _frontendSettingsFontDimensions :: (Int,Int)
+}
+
 data FrontendState = FrontendState {
     _frontendStateTextHistory :: [String],
     _frontendStateWindows :: M.Map WHandle Window,
-    _frontendStateDimensions :: (Int,Int)
+    _frontendStateSettings :: FrontendSettings
 }
 
 type TAIO a = StateT FrontendState IO a
 
 makeFields ''FrontendState
+
+makeFields ''FrontendSettings
 
 makeFields ''Window
 
@@ -60,7 +67,7 @@ executeResponse ss (TextResponse s) = do
     textHistory %= (++lines s)
     return ss
 executeResponse ss (InitiateDialogueResponse d) = do
-    (x,y) <- use dimensions
+    (x,y) <- use (settings.dimensions)
     openTopWindow 2 2 (x-4) (y-8) (\ss _ -> [head(ss^.stack)^.dialogue.response]) (contextCount ss + 1)
     return $ openContext (DialogueState d) ss
 executeResponse ss LeaveContextResponse = do
@@ -70,16 +77,16 @@ executeResponse ss LeaveContextResponse = do
 executeResponses :: Responding StateStack -> TAIO StateStack
 executeResponses (Responding responses ss) = foldM executeResponse ss responses
 
-initialFrontendState :: (Int,Int) -> FrontendState
-initialFrontendState (w,h) = FrontendState 
+initialFrontendState :: (Int,Int) -> (Int,Int) -> FrontendState
+initialFrontendState (w,h) (fw,fh) = FrontendState 
     [] 
     (M.fromList [
             (0,Window 0 0 (h-3) w 3 (\_ _ -> ["testtext"]) 0),
             (1,Window 1 0 0 w (h-3) (\_ rs -> rs^.textHistory) 0)
             ]) 
-    (w,h)
+    $ FrontendSettings (w,h) (fw,fh)
 
-runFrontend :: (Int,Int) -> TAIO () -> IO ()
-runFrontend dims action = do 
-    let irs = initialFrontendState dims
+runFrontend :: (Int,Int) -> (Int,Int) -> TAIO () -> IO ()
+runFrontend dims fdims action = do 
+    let irs = initialFrontendState dims fdims
     void $ execStateT action irs

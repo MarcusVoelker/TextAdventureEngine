@@ -21,29 +21,30 @@ import Text.LParse.Parser
 
 import Control.Arrow hiding (left)
 import Control.DoubleContinuations
-import Control.Lens
+import Control.Lens hiding (view)
 import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans.Class
+import Data.Bifunctor
 import Data.Maybe
 import qualified Data.Map.Strict as M
 
-fullParser :: (Renderer re) => String -> String -> String -> DCont r String (TAIO re StateStack)
+fullParser :: String -> String -> String -> DCont r String StateStack
 fullParser r e i = do
     rMap <- fst <$> pFunc (tokenizer >>> blocker >>> rooms) r
     iMap <- fst <$> pFunc (tokenizer >>> blocker >>> items) i
     es <- fst <$> pFunc (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap iMap) e
     let initial = initialState (fromJust $ M.lookup "init" rMap) []
-    return $ executeResponses $ (\gs -> StateStack gs []) <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
+    return $ (^.result) $ (\gs -> StateStack gs []) <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
-runGame :: (Renderer r) => (StateStack -> TAIO r ()) -> IO ()
-runGame ml = withEngine soundEngine $ do
+runGame :: IO ()
+runGame = withEngine soundEngine $ do
     roomCode <- readFile "app/rooms.dat"
     entityCode <- readFile "app/entities.dat"
     itemCode <- readFile "app/items.dat"
-    run (fullParser roomCode entityCode itemCode) (runFrontend (80,40).(>>= ml)) putStrLn
+    run (fullParser roomCode entityCode itemCode) mainOpenGL putStrLn
 
-mainLoop :: (Renderer r) => StateStack -> TAIO r ()
+{-mainLoop :: StateStack -> TAIO ()
 mainLoop ss = do
     render ss
     if noContext ss then do
@@ -56,31 +57,35 @@ mainLoop ss = do
     else do
         command <- lift getLine
         ss' <- executeResponses $ execStateT (liftTemporary (tempAction command)) ss
-        mainLoop ss'
+        mainLoop ss'-}
 
-mainOpenGL :: IO ()
-mainOpenGL = do
-    ifs <- initialFrontendState (80,40) :: IO (FrontendState OpenGLRenderer)
+mainOpenGL :: StateStack -> IO ()
+mainOpenGL ss = do
+    let ifs = initialFrontendState (120,40) (6,13)
     playIO
-        (InWindow "Hello World" (800,600) (500,200))
+        (InWindow "Hello World" (120*6,40*13) (500,200))
         black
         60
-        ifs 
+        (ss,ifs)
         renderFrontend
         (const return)
         (const return)
 
-renderFrontend :: FrontendState -> IO Picture
-renderFrontend fs = do
+renderFrontend :: (StateStack,FrontendState) -> IO Picture
+renderFrontend (ss,fs) = do
+    let dims = fs^.settings.dimensions
+    let fdims = fs^.settings.fontDimensions
     let ws = M.elems (fs^.windows)
-    return $ Pictures $ map (renderWindowGL (80,40)) ws
+    return $ Pictures $ map (renderWindowGL (ss,fs)) ws
 
-renderWindowGL :: (Renderer r) => (Int,Int) -> Window r -> Picture
-renderWindowGL (cw,ch) win = 
+renderWindowGL :: (StateStack,FrontendState) -> Window -> Picture
+renderWindowGL (ss,fs) win = 
+    let (cw,ch) = bimap fromIntegral fromIntegral $ fs^.settings.dimensions in
+    let (fw,fh) = bimap fromIntegral fromIntegral $ fs^.settings.fontDimensions in
     let x = fromIntegral $ win^.left in
     let y = fromIntegral $ win^.top in
     let w = fromIntegral $ win^.width in
     let h = fromIntegral $ win^.height in
-    let hnd = win^.handle in
-    Translate (-10*fromIntegral cw/2) (15*fromIntegral ch/2) $ Color (greyN (fromIntegral hnd)) $ Polygon [(x*10,-y*15),(10*(x+w),-y*15),(10*(x+w),-15*(y+h)),(x*10,-15*(y+h))]
-    --Color green $ Polygon [(x*10,y*10),(x*10+w*10,y*10),(x*10+w*10,y*10+h*10),(x*10,y*10+h*10)]
+    let v = win^.view in
+    let hnd = fromIntegral $ win^.handle in
+    Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ Pictures (Color (greyN hnd) (Polygon [(0,0),(fw*w,0),(fw*w,-fh*h),(0,-fh*h)]):map (Translate 10 (-10) . Color green . Scale 0.1 0.1 . Text) ["test"])
