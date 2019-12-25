@@ -503,7 +503,7 @@ renderWindow (ss,fs) win =
         Translate 1 (-fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
         Pictures $ map (\o -> Translate 1 (-o*fh) $ Color green $ renderText ('|':replicate ((win^.width)-2) ' ' ++"|")) [2..h-1],
         Translate 1 (-h*fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
-        Pictures (zipWith (\o -> Translate (fw+1) (-fh*o) . Color green . renderText) [2..] (v ss fs)),
+        Pictures (zipWith (\o -> Translate (fw+1) (-fh*o) . Color green . renderText) [2..] ((\ts -> drop (length ts - win^.height+2) ts) (v ss fs))),
         if hnd /= 0 then Blank else 
             let cy = fromIntegral $ length (v ss fs) in
             let cx = fromIntegral $ length (last (v ss fs)) in
