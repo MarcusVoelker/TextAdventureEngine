@@ -45,32 +45,17 @@ runGame = withEngine soundEngine $ do
     itemCode <- readFile "app/items.dat"
     run (fullParser roomCode entityCode itemCode) mainOpenGL putStrLn
 
-{-mainLoop :: StateStack -> TAIO ()
-mainLoop ss = do
-    render ss
-    if noContext ss then do
-        command <- getInput
-        unless (command == "quit") $ do
-            ss' <- parse action command 
-                (\c -> executeResponses $ execStateT (liftBottom c) ss)
-                (const $ executeResponse ss $ TextResponse "I did not understand that.")
-            mainLoop ss'
-    else do
-        command <- lift getLine
-        ss' <- executeResponses $ execStateT (liftTemporary (tempAction command)) ss
-        mainLoop ss'-}
-
 mainOpenGL :: StateStack -> IO ()
 mainOpenGL ss = do
-    let ifs = initialFrontendState (120,40) (6,12)
+    let ifs = initialFrontendState (120,40) (8,16)
     playIO
         (InWindow "Hello World" (120*8,40*16) (500,200))
         black
         60
         (ss,ifs)
         renderFrontend
-        (const return)
-        (const return)
+        eventHandler
+        updateFrontend
 
 renderFrontend :: (StateStack,FrontendState) -> IO Picture
 renderFrontend (ss,fs) = do

@@ -373,7 +373,111 @@ chars = M.fromList [
     pix (4,8),
     pix (5,9)
     ]),
-    (' ',Blank)
+-- digits
+    ('0',Pictures [
+    hline (0,10) 7,
+    hline (0,4) 7,
+    vline (0,4) 7,
+    vline (6,4) 7,
+    vline (3,6) 3
+    ]),
+    ('1',Pictures [
+    hline (3,10) 4,
+    vline (6,4) 7
+    ]),
+    ('2',Pictures [
+    hline (0,10) 7,
+    hline (0,7) 7,
+    hline (0,4) 7,
+    vline (0,4) 4,
+    vline (6,7) 4
+    ]),
+    ('3',Pictures [
+    hline (0,10) 7,
+    hline (0,4) 7,
+    hline (0,0) 7,
+    vline (6,0) 10
+    ]),
+    ('4',Pictures [
+    vline (0,4) 7,
+    hline (0,4) 7,
+    vline (6,0) 10
+    ]),
+    ('5',Pictures [
+    hline (0,10) 7,
+    hline (0,4) 7,
+    hline (0,0) 7,
+    vline (0,4) 7,
+    vline (6,0) 4
+    ]),
+    ('6',Pictures [
+    hline (0,14) 7,
+    hline (0,10) 7,
+    hline (0,4) 7,
+    vline (0,4) 11,
+    vline (6,4) 7
+    ]),
+    ('7',Pictures [
+    hline (0,10) 7,
+    vline (6,0) 11
+    ]),
+    ('8',Pictures [
+    hline (0,14) 7,
+    hline (0,10) 7,
+    hline (0,4) 7,
+    vline (0,4) 11,
+    vline (6,4) 11
+    ]),
+    ('9',Pictures [
+    hline (0,10) 7,
+    vline (6,0) 11,
+    hline (0,4) 7,
+    vline (0,4) 7,
+    hline (0,0) 7
+    ]),
+-- Punctuation and so on
+    (' ',Blank),
+    (',', vline (0,3) 3),
+    ('.', pix (0,4)),
+    (':', Pictures[
+    vline (1,5) 2,
+    vline (1,9) 2
+    ]),
+    ('-', hline (1,7) 5),
+    ('+', Pictures [
+    hline (1,7) 5,
+    vline (3,5) 5
+    ]),
+    ('<', Pictures[
+    pix (0,7),
+    hline (1,8) 2,
+    hline (1,6) 2,
+    hline (3,9) 2,
+    hline (3,5) 2,
+    hline (5,10) 2,
+    hline (5,4) 2
+    ]),
+    ('>', Pictures[
+    pix (6,7),
+    hline (4,8) 2,
+    hline (4,6) 2,
+    hline (2,9) 2,
+    hline (2,5) 2,
+    hline (0,10) 2,
+    hline (0,4) 2
+    ]),
+    ('!', Pictures [
+    vline (3,7) 8,
+    vline (3,4) 2
+    ]),
+    ('?', Pictures [
+    hline (0,14) 7,
+    hline (0,10) 7,
+    hline (0,7) 7,
+    vline (0,7) 3,
+    vline (6,10) 4,
+    vline (3,4) 2
+    ])
     ]
 
 renderText :: String -> Picture
@@ -389,4 +493,15 @@ renderWindow (ss,fs) win =
     let h = fromIntegral $ win^.height in
     let v = win^.view in
     let hnd = fromIntegral $ win^.handle in
-    Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ Pictures (Color (greyN hnd) (Polygon [(0,0),(fw*w,0),(fw*w,-fh*h),(0,-fh*h)]):zipWith (\o -> Translate 1 (-16*o) . Color green . renderText) [1..]["ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz","The quick brown fox jumps over the lazy dog","Franz jagt im komplett verwahrlosten Taxi quer durch Bayern"])
+    let cursorColor = if mod (floor ((fs^.elapsedTime)*0.7)+hnd) 2 == 1 then green else black in
+    Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ 
+    Pictures [
+        Color black $ rect (0,0) (w*fw,h*fh),
+        Translate 1 (-fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
+        Translate 1 (-h*fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
+        Pictures (zipWith (\o -> Translate 1 (-fh*o) . Color green . renderText) [2..] (v ss fs)),
+        if hnd /= 0 then Blank else 
+            let cy = fromIntegral $ length (v ss fs) in
+            let cx = fromIntegral $ length (last (v ss fs)) in
+            Translate (cx*fw+1) (-(cy+1)*fh) $ Color cursorColor $ rect (0,0) (fw-1,fh-1)
+        ]
