@@ -275,8 +275,8 @@ chars = M.fromList [
     hline (5,4) 2
     ]),
     ('l',Pictures [
-    vline (0,4) 11,
-    hline (0,4) 3
+    vline (2,4) 11,
+    hline (2,4) 3
     ]),
     ('m',Pictures [
     hline (0,10) 7,
@@ -319,7 +319,7 @@ chars = M.fromList [
     vline (0,7) 4
     ]),
     ('t',Pictures [
-    hline (1,11) 3,
+    hline (1,11) 5,
     hline (2,4) 5,
     vline (2,4) 11
     ]),
@@ -443,7 +443,7 @@ chars = M.fromList [
     vline (1,5) 2,
     vline (1,9) 2
     ]),
-    ('-', hline (1,7) 5),
+    ('-', hline (0,7) 7),
     ('+', Pictures [
     hline (1,7) 5,
     vline (3,5) 5
@@ -477,6 +477,9 @@ chars = M.fromList [
     vline (0,7) 3,
     vline (6,10) 4,
     vline (3,4) 2
+    ]),
+    ('|', Pictures [
+    vline (3,0) 15
     ])
     ]
 
@@ -496,12 +499,13 @@ renderWindow (ss,fs) win =
     let cursorColor = if mod (floor ((fs^.elapsedTime)*0.7)+hnd) 2 == 1 then green else black in
     Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ 
     Pictures [
-        Color black $ rect (0,0) (w*fw,h*fh),
+        Color black $ rect (0,0) (w*fw,-h*fh),
         Translate 1 (-fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
+        Pictures $ map (\o -> Translate 1 (-o*fh) $ Color green $ renderText ('|':replicate ((win^.width)-2) ' ' ++"|")) [2..h-1],
         Translate 1 (-h*fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
-        Pictures (zipWith (\o -> Translate 1 (-fh*o) . Color green . renderText) [2..] (v ss fs)),
+        Pictures (zipWith (\o -> Translate (fw+1) (-fh*o) . Color green . renderText) [2..] (v ss fs)),
         if hnd /= 0 then Blank else 
             let cy = fromIntegral $ length (v ss fs) in
             let cx = fromIntegral $ length (last (v ss fs)) in
-            Translate (cx*fw+1) (-(cy+1)*fh) $ Color cursorColor $ rect (0,0) (fw-1,fh-1)
+            Translate ((cx+1)*fw+1) (-(cy+1)*fh) $ Color cursorColor $ rect (0,0) (fw-1,fh-1)
         ]
