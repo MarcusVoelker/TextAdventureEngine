@@ -14,7 +14,9 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Data.Char
+import Data.List
 import qualified Data.Map.Strict as M
+import Data.Maybe
 import System.Exit
 import System.IO (hFlush, stdout)
 
@@ -42,6 +44,9 @@ data FrontendSettings = FrontendSettings {
 data FrontendState = FrontendState {
     _frontendStateTextHistory :: [String],
     _frontendStateInputBuffer :: String,
+    _frontendStateInputHistory :: [String],
+    _frontendStateInputHistoryPointer :: Int,
+    _frontendStateInputSearch :: Maybe String,
     _frontendStateWindows :: M.Map WHandle Window,
     _frontendStateSettings :: FrontendSettings,
     _frontendStateElapsedTime :: Float
@@ -86,7 +91,7 @@ executeResponses (Responding responses ss) = foldM executeResponse ss responses
 
 initialFrontendState :: (Int,Int) -> (Int,Int) -> FrontendState
 initialFrontendState (w,h) (fw,fh) = FrontendState 
-    [] []
+    [] [] [] 0 Nothing
     (M.fromList [
         (0,Window 0 0 (h-3) w 3 (\_ fs -> ["> " ++ (fs^.inputBuffer)]) 0),
         (1,Window 1 0 0 w (h-3) (\_ fs -> fs^.textHistory) 0)
@@ -116,9 +121,27 @@ handleEvent (EventKey (SpecialKey KeySpace) Down _ _) ss = do
     inputBuffer %= (++[' '])
     return ss
 handleEvent (EventKey (SpecialKey KeyShiftR) Down _ _) ss = return ss
+handleEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
+    st <- use inputSearch
+    when (isNothing st) $ do
+        curCode <- use inputBuffer
+        inputSearch .= Just curCode
+    searchTerm <- use inputSearch
+    ip <- use inputHistoryPointer
+    prefix <- uses inputHistory (reverse . take ip)
+    case find (fromJust searchTerm `isPrefixOf`) prefix of
+        Nothing -> return ss
+        Just pCode -> do
+            inputHistoryPointer .= fromJust (elemIndex pCode (reverse prefix))
+            inputBuffer .= pCode
+            return ss
 handleEvent (EventKey (SpecialKey KeyEnter) Down _ _) ss = do
     code <- use inputBuffer
+    inputHistory %= (++[code])
+    ihLen <- uses inputHistory length
+    inputHistoryPointer .= ihLen
     inputBuffer .= ""
+    inputSearch .= Nothing
     executeResponses $ executeCommand code ss
 handleEvent (EventResize (x,y)) ss = do
     (fx,fy) <- use $ settings.fontDimensions
