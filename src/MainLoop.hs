@@ -14,6 +14,7 @@ import Map.Room
 import Sound.Engine
 import Engine
 import Frontend.Frontend
+import Frontend.Window
 
 import Graphics.Gloss.Interface.IO.Game
 
@@ -61,9 +62,9 @@ mainLoop ss = do
 
 mainOpenGL :: StateStack -> IO ()
 mainOpenGL ss = do
-    let ifs = initialFrontendState (120,40) (6,13)
+    let ifs = initialFrontendState (120,40) (6,12)
     playIO
-        (InWindow "Hello World" (120*6,40*13) (500,200))
+        (InWindow "Hello World" (120*8,40*16) (500,200))
         black
         60
         (ss,ifs)
@@ -76,16 +77,4 @@ renderFrontend (ss,fs) = do
     let dims = fs^.settings.dimensions
     let fdims = fs^.settings.fontDimensions
     let ws = M.elems (fs^.windows)
-    return $ Pictures $ map (renderWindowGL (ss,fs)) ws
-
-renderWindowGL :: (StateStack,FrontendState) -> Window -> Picture
-renderWindowGL (ss,fs) win = 
-    let (cw,ch) = bimap fromIntegral fromIntegral $ fs^.settings.dimensions in
-    let (fw,fh) = bimap fromIntegral fromIntegral $ fs^.settings.fontDimensions in
-    let x = fromIntegral $ win^.left in
-    let y = fromIntegral $ win^.top in
-    let w = fromIntegral $ win^.width in
-    let h = fromIntegral $ win^.height in
-    let v = win^.view in
-    let hnd = fromIntegral $ win^.handle in
-    Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ Pictures (Color (greyN hnd) (Polygon [(0,0),(fw*w,0),(fw*w,-fh*h),(0,-fh*h)]):map (Translate 10 (-10) . Color green . Scale 0.1 0.1 . Text) ["test"])
+    return $ Pictures $ map (renderWindow (ss,fs)) ws
