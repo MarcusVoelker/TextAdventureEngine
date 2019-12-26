@@ -1,9 +1,11 @@
 module Frontend.Window where
 
 import Frontend.Frontend
+
 import Logic.StateStack
 
 import Control.Lens hiding (view)
+import Control.Monad.Trans.State
 import qualified Data.Map.Strict as M
 import Graphics.Gloss
 
@@ -486,26 +488,32 @@ chars = M.fromList [
 renderText :: String -> Picture
 renderText = Pictures . zipWith (\o c -> Translate o 0 $ M.findWithDefault (rect (0,4) (7,7)) c chars) [0,8..]
 
-renderWindow :: (StateStack,FrontendState) -> Window -> Picture
-renderWindow (ss,fs) win = 
-    let (cw,ch) = bimap fromIntegral fromIntegral $ fs^.settings.dimensions in
-    let (fw,fh) = bimap fromIntegral fromIntegral $ fs^.settings.fontDimensions in
-    let x = fromIntegral $ win^.left in
-    let y = fromIntegral $ win^.top in
-    let w = fromIntegral $ win^.width in
-    let h = fromIntegral $ win^.height in
-    let v = win^.view in
-    let hnd = fromIntegral $ win^.handle in
-    let cursorColor = if mod (floor ((fs^.elapsedTime)*0.7)+hnd) 2 == 1 then green else black in
-    Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ 
-    Pictures [
-        Color black $ rect (0,0) (w*fw,-h*fh),
-        Translate 1 (-fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
-        Pictures $ map (\o -> Translate 1 (-o*fh) $ Color green $ renderText ('|':replicate ((win^.width)-2) ' ' ++"|")) [2..h-1],
-        Translate 1 (-h*fh) $ Color green $ renderText ('+':replicate ((win^.width)-2) '-' ++"+"),
-        Pictures (zipWith (\o -> Translate (fw+1) (-fh*o) . Color green . renderText) [2..] ((\ts -> drop (length ts - win^.height+2) ts) (v ss fs))),
-        if hnd /= 0 then Blank else 
-            let cy = fromIntegral $ length (v ss fs) in
-            let cx = fromIntegral $ length (last (v ss fs)) in
-            Translate ((cx+1)*fw+1) (-(cy+1)*fh) $ Color cursorColor $ rect (0,0) (fw-1,fh-1)
-        ]
+renderWindow :: StateStack -> Window -> TAIO Picture
+renderWindow ss win = do
+    (cw,ch) <- uses (settings.dimensions) (bimap fromIntegral fromIntegral)
+    (fw,fh) <- uses (settings.fontDimensions) (bimap fromIntegral fromIntegral)
+    x <- fromIntegral <$> resolveLocation X (win^.left)
+    y <- fromIntegral <$> resolveLocation Y (win^.top)
+    x' <- fromIntegral <$> resolveLocation X (win^.right) 
+    y' <- fromIntegral <$> resolveLocation Y (win^.bottom)
+    let w = x'-x + 1
+    let iW = round w - 2
+    let h = y'-y + 1
+    let iH = round h - 2
+    let v = win^.view
+    let hnd = fromIntegral $ win^.handle
+    et <- use elapsedTime
+    let cursorColor = if mod (floor (et*0.7)+hnd) 2 == 1 then green else black
+    fs <- get
+    return $ Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ 
+        Pictures [
+            Color black $ rect (0,0) (w*fw,-h*fh),
+            Translate 1 (-fh) $ Color green $ renderText ('+':replicate iW '-' ++"+"),
+            Pictures $ map (\o -> Translate 1 (-o*fh) $ Color green $ renderText ('|':replicate iW ' ' ++"|")) [2..h-1],
+            Translate 1 (-h*fh) $ Color green $ renderText ('+':replicate iW '-' ++"+"),
+            Pictures (zipWith (\o -> Translate (fw+1) (-fh*o) . Color green . renderText) [2..] ((\ts -> drop (length ts - iH) ts) (v ss fs))),
+            if hnd /= 0 then Blank else 
+                let cy = fromIntegral $ length (v ss fs) in
+                let cx = fromIntegral $ length (last (v ss fs)) in
+                Translate ((cx+1)*fw+1) (-(cy+1)*fh) $ Color cursorColor $ rect (0,0) (fw-1,fh-1)
+            ]

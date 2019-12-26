@@ -26,12 +26,15 @@ type WHandle = Int
 
 type View = StateStack -> FrontendState -> [String]
 
+data ScreenLoc = Absolute Int | Relative Float
+data LocKind = X | Y
+
 data Window = Window {
     _windowHandle :: WHandle,
-    _windowLeft :: Int,
-    _windowTop :: Int,
-    _windowWidth :: Int,
-    _windowHeight :: Int,
+    _windowLeft :: ScreenLoc,
+    _windowTop :: ScreenLoc,
+    _windowRight :: ScreenLoc,
+    _windowBottom :: ScreenLoc,
     _windowView :: View,
     _windowContext :: Int
 }
@@ -64,7 +67,16 @@ data TAIOException = TAIOException deriving (Show)
 
 instance Exception TAIOException
 
-openTopWindow :: Int -> Int -> Int -> Int -> View -> Int -> TAIO ()
+resolveLocation :: LocKind -> ScreenLoc -> TAIO Int
+resolveLocation _ (Absolute x) | x >= 0 = return x
+resolveLocation X (Absolute x) = do
+        max <- uses (settings.dimensions) fst
+        return $ max + x
+resolveLocation Y (Absolute x) = do
+        max <- uses (settings.dimensions) snd
+        return $ max + x
+
+openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> View -> Int -> TAIO ()
 openTopWindow x y w h v c = do
     hand <- (+1) . maximum . M.keys <$> use windows
     let win = Window hand x y w h v c
@@ -78,8 +90,13 @@ executeResponse ss (TextResponse s) = do
     textHistory %= (++lines s)
     return ss
 executeResponse ss (InitiateDialogueResponse d) = do
-    (x,y) <- use (settings.dimensions)
-    openTopWindow 2 2 (x-4) (y-8) (\ss _ -> [head(ss^.stack)^.dialogue.response]) (contextCount ss + 1)
+    openTopWindow 
+        (Absolute 2)
+        (Absolute 2) 
+        (Absolute (-4)) 
+        (Absolute (-8))
+        (\ss _ -> [head(ss^.stack)^.dialogue.response])
+        (contextCount ss + 1)
     return $ openContext (DialogueState d) ss
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
@@ -93,8 +110,8 @@ initialFrontendState :: (Int,Int) -> (Int,Int) -> FrontendState
 initialFrontendState (w,h) (fw,fh) = FrontendState 
     [] [] [] 0 Nothing
     (M.fromList [
-        (0,Window 0 0 (h-3) w 3 (\_ fs -> ["> " ++ (fs^.inputBuffer)]) 0),
-        (1,Window 1 0 0 w (h-3) (\_ fs -> fs^.textHistory) 0)
+        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.inputBuffer)]) 0),
+        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-3)) (\_ fs -> fs^.textHistory) 0)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
     0
@@ -156,8 +173,8 @@ handleEvent e ss = do
     lift $ putStrLn $ "Unhandled Event " ++ show e
     return ss
 
-updateFrontend :: Float -> (StateStack,FrontendState) -> IO (StateStack,FrontendState)
-updateFrontend t (ss,fs) = runStateT (stepFrontend t ss) fs
+updateHandler :: Float -> (StateStack,FrontendState) -> IO (StateStack,FrontendState)
+updateHandler t (ss,fs) = runStateT (stepFrontend t ss) fs
 
 stepFrontend :: Float -> StateStack -> TAIO StateStack
 stepFrontend t ss = do

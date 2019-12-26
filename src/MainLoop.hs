@@ -53,13 +53,14 @@ mainOpenGL ss = do
         black
         60
         (ss,ifs)
-        renderFrontend
+        renderHandler
         eventHandler
-        updateFrontend
+        updateHandler
 
-renderFrontend :: (StateStack,FrontendState) -> IO Picture
-renderFrontend (ss,fs) = do
-    let dims = fs^.settings.dimensions
-    let fdims = fs^.settings.fontDimensions
-    let ws = M.elems (fs^.windows)
-    return $ Pictures $ map (renderWindow (ss,fs)) ws
+renderHandler :: (StateStack,FrontendState) -> IO Picture
+renderHandler (ss,fs) = evalStateT (renderFrontend ss) fs
+
+renderFrontend :: StateStack -> TAIO Picture
+renderFrontend ss = do
+    ws <- uses windows M.elems
+    Pictures <$> mapM (renderWindow ss) ws
