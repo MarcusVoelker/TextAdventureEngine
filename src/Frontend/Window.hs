@@ -377,40 +377,39 @@ chars = M.fromList [
     ]),
 -- digits
     ('0',Pictures [
-    hline (0,10) 7,
+    hline (0,14) 7,
     hline (0,4) 7,
-    vline (0,4) 7,
-    vline (6,4) 7,
-    vline (3,6) 3
+    vline (0,4) 11,
+    vline (6,4) 11,
+    vline (3,6) 7
     ]),
     ('1',Pictures [
-    hline (3,10) 4,
-    vline (6,4) 7
+    vline (3,4) 11 
     ]),
     ('2',Pictures [
+    hline (0,14) 7,
     hline (0,10) 7,
-    hline (0,7) 7,
     hline (0,4) 7,
-    vline (0,4) 4,
-    vline (6,7) 4
+    vline (0,4) 7,
+    vline (6,10) 5
     ]),
     ('3',Pictures [
+    hline (0,14) 7,
     hline (0,10) 7,
     hline (0,4) 7,
-    hline (0,0) 7,
-    vline (6,0) 10
+    vline (6,4) 11 
     ]),
     ('4',Pictures [
-    vline (0,4) 7,
-    hline (0,4) 7,
-    vline (6,0) 10
+    vline (0,10) 5,
+    hline (0,10) 7,
+    vline (6,4) 11
     ]),
     ('5',Pictures [
+    hline (0,14) 7,
     hline (0,10) 7,
     hline (0,4) 7,
-    hline (0,0) 7,
-    vline (0,4) 7,
-    vline (6,0) 4
+    vline (0,10) 5,
+    vline (6,4) 7
     ]),
     ('6',Pictures [
     hline (0,14) 7,
@@ -420,8 +419,8 @@ chars = M.fromList [
     vline (6,4) 7
     ]),
     ('7',Pictures [
-    hline (0,10) 7,
-    vline (6,0) 11
+    hline (0,14) 7,
+    vline (6,4) 11
     ]),
     ('8',Pictures [
     hline (0,14) 7,
@@ -431,14 +430,14 @@ chars = M.fromList [
     vline (6,4) 11
     ]),
     ('9',Pictures [
+    hline (0,14) 7,
     hline (0,10) 7,
-    vline (6,0) 11,
     hline (0,4) 7,
-    vline (0,4) 7,
-    hline (0,0) 7
+    vline (0,10) 5,
+    vline (6,4) 11
     ]),
 -- Punctuation and so on
-    (' ',Blank),
+    (' ', Blank),
     (',', vline (0,3) 3),
     ('.', pix (0,4)),
     (':', Pictures[
@@ -447,8 +446,8 @@ chars = M.fromList [
     ]),
     ('-', hline (0,7) 7),
     ('+', Pictures [
-    hline (1,7) 5,
-    vline (3,5) 5
+    hline (0,7) 7,
+    vline (3,4) 7
     ]),
     ('<', Pictures[
     pix (0,7),
@@ -503,7 +502,7 @@ renderWindow ss win = do
     let v = win^.view
     let hnd = fromIntegral $ win^.handle
     et <- use elapsedTime
-    let cursorColor = if mod (floor (et*0.7)+hnd) 2 == 1 then green else black
+    let cursorColor = if mod (floor (et*0.7)) 2 == 1 then green else black
     fs <- get
     return $ Translate (fw*(x-cw/2)) (fh*(-y+ch/2)) $ 
         Pictures [

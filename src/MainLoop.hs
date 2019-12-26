@@ -60,7 +60,17 @@ mainOpenGL ss = do
 renderHandler :: (StateStack,FrontendState) -> IO Picture
 renderHandler (ss,fs) = evalStateT (renderFrontend ss) fs
 
+screenEffect :: TAIO Picture
+screenEffect = do
+    (cw,ch) <- uses (settings.dimensions) (bimap fromIntegral fromIntegral)
+    (fw,fh) <- uses (settings.fontDimensions) (bimap fromIntegral fromIntegral)
+    let w = fw*cw
+    let h = fh*ch
+    return $ Translate (fw*(-cw/2)) (fh*(ch/2)) $ 
+        Pictures $ map (\y -> Color (makeColor 0 (fromIntegral (mod y 2)) 0 0.1) $ rect (0,-2*fromIntegral y) (w,2)) [0..div (round h-1) 2]
+
 renderFrontend :: StateStack -> TAIO Picture
 renderFrontend ss = do
     ws <- uses windows M.elems
-    Pictures <$> mapM (renderWindow ss) ws
+    se <- screenEffect
+    Pictures . (++[se]) <$> mapM (renderWindow ss) ws
