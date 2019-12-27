@@ -151,7 +151,9 @@ chars = M.fromList [
     hline (0,10) 7,
     hline (0,4) 7,
     vline (6,4) 7,
-    vline (0,10) 5
+    vline (0,10) 5,
+    vline (0,4) 2,
+    vline (6,13) 2
     ]),
     ('T',Pictures [
     hline (0,14) 7,
@@ -163,13 +165,13 @@ chars = M.fromList [
     vline (6,4) 11
     ]),
     ('V',Pictures [
-    vline (3,4) 2,
-    vline (2,6) 3,
-    vline (4,6) 3,
-    vline (1,9) 3,
-    vline (5,9) 3,
-    vline (0,12) 3,
-    vline (6,12) 3
+    vline (0,4) 11,
+    vline (6,10) 5,
+    pix (1,5),
+    pix (2,6),
+    pix (3,7),
+    pix (4,8),
+    pix (5,9)
     ]),
     ('W',Pictures [
     hline (0,4) 7,
@@ -178,13 +180,13 @@ chars = M.fromList [
     vline (6,4) 11
     ]),
     ('X',Pictures [
-    vline (3,9) 2,
-    vline (2,8) 2,
-    vline (4,8) 2,
-    vline (1,6) 2,
-    vline (5,6) 2,
-    vline (0,4) 2,
-    vline (6,4) 2,
+    vline (0,4) 4,
+    vline (6,4) 4,
+    pix (2,9),
+    pix (4,9),
+    pix (1,8),
+    pix (5,8),
+    pix (3,10),
     pix (2,11),
     pix (4,11),
     pix (1,12),
@@ -268,13 +270,13 @@ chars = M.fromList [
     ]),
     ('k',Pictures [
     vline (0,4) 11,
-    pix (0,7),
-    hline (1,8) 2,
-    hline (1,6) 2,
-    hline (3,9) 2,
-    hline (3,5) 2,
-    hline (5,10) 2,
-    hline (5,4) 2
+    hline (0,7) 4,
+    pix (4,6),
+    pix (4,8),
+    pix (5,5),
+    pix (5,9),
+    pix (6,4),
+    pix (6,10)
     ]),
     ('l',Pictures [
     vline (2,4) 11,
@@ -331,13 +333,11 @@ chars = M.fromList [
     vline (6,4) 7
     ]),
     ('v',Pictures [
-    pix (3,4),
-    vline (2,5) 2,
-    vline (4,5) 2,
-    vline (1,7) 2,
-    vline (5,7) 2,
-    vline (0,9) 2,
-    vline (6,9) 2
+    hline (0,4) 4,
+    vline (0,4) 7,
+    vline (6,7) 4,
+    pix (4,5),
+    pix (5,6)
     ]),
     ('w',Pictures [
     hline (0,4) 7,
@@ -381,7 +381,7 @@ chars = M.fromList [
     hline (0,4) 7,
     vline (0,4) 11,
     vline (6,4) 11,
-    vline (3,6) 7
+    vline (3,7) 5
     ]),
     ('1',Pictures [
     vline (3,4) 11 
@@ -439,7 +439,10 @@ chars = M.fromList [
 -- Punctuation and so on
     (' ', Blank),
     (',', vline (0,3) 3),
-    ('.', pix (0,4)),
+    ('.', Pictures[
+        vline (0,4) 2,
+        vline (1,4) 2
+    ]),
     (':', Pictures[
     vline (1,5) 2,
     vline (1,9) 2
@@ -481,7 +484,12 @@ chars = M.fromList [
     ]),
     ('|', Pictures [
     vline (3,0) 15
-    ])
+    ]),
+    ('\"', Pictures [
+        vline (2,11) 4,
+        vline (4,11) 4
+    ]),
+    ('\'',vline (3,11) 4)
     ]
 
 renderText :: String -> Picture
