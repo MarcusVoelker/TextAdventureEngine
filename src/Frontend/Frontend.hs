@@ -1,5 +1,12 @@
 module Frontend.Frontend where
 
+import Frontend.Canvas
+import Frontend.CanvasRenderer
+import Frontend.Primitives
+import Frontend.State
+import Frontend.TAIO
+import Frontend.Window
+
 import Logic.Dialogue
 import Logic.Driver
 import Logic.GameState
@@ -21,60 +28,6 @@ import System.Exit
 import System.IO (hFlush, stdout)
 
 import Graphics.Gloss.Interface.IO.Game
-
-type WHandle = Int
-
-type View = StateStack -> FrontendState -> [String]
-
-data ScreenLoc = Absolute Int | Relative Float
-data LocKind = X | Y
-
-data Window = Window {
-    _windowHandle :: WHandle,
-    _windowLeft :: ScreenLoc,
-    _windowTop :: ScreenLoc,
-    _windowRight :: ScreenLoc,
-    _windowBottom :: ScreenLoc,
-    _windowView :: View,
-    _windowContext :: Int
-}
-
-data FrontendSettings = FrontendSettings {
-    _frontendSettingsDimensions :: (Int,Int),
-    _frontendSettingsFontDimensions :: (Int,Int)
-}
-
-data FrontendState = FrontendState {
-    _frontendStateTextHistory :: [String],
-    _frontendStateInputBuffer :: String,
-    _frontendStateInputHistory :: [String],
-    _frontendStateInputHistoryPointer :: Int,
-    _frontendStateInputSearch :: Maybe String,
-    _frontendStateWindows :: M.Map WHandle Window,
-    _frontendStateSettings :: FrontendSettings,
-    _frontendStateElapsedTime :: Float
-}
-
-type TAIO a = StateT FrontendState IO a
-
-makeFields ''FrontendState
-
-makeFields ''FrontendSettings
-
-makeFields ''Window
-
-data TAIOException = TAIOException deriving (Show)
-
-instance Exception TAIOException
-
-resolveLocation :: LocKind -> ScreenLoc -> TAIO Int
-resolveLocation _ (Absolute x) | x >= 0 = return x
-resolveLocation X (Absolute x) = do
-        max <- uses (settings.dimensions) fst
-        return $ max + x
-resolveLocation Y (Absolute x) = do
-        max <- uses (settings.dimensions) snd
-        return $ max + x
 
 openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> View -> Int -> TAIO ()
 openTopWindow x y w h v c = do
@@ -106,11 +59,16 @@ executeResponse ss QuitResponse = lift exitSuccess
 executeResponses :: Responding StateStack -> TAIO StateStack
 executeResponses (Responding responses ss) = foldM executeResponse ss responses
 
+initialInputState :: InputState 
+initialInputState = InputState [] [] 0 Nothing
+
 initialFrontendState :: (Int,Int) -> (Int,Int) -> FrontendState
 initialFrontendState (w,h) (fw,fh) = FrontendState 
-    [] [] [] 0 Nothing
+    [] 
+    initialInputState
+    initialCanvasState
     (M.fromList [
-        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.inputBuffer)]) 0),
+        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.input.buffer)]) 0),
         (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-3)) (\_ fs -> fs^.textHistory) 0)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
@@ -127,38 +85,38 @@ eventHandler e (ss,fs) = runStateT (handleEvent e ss) fs
 handleEvent :: Event -> StateStack -> TAIO StateStack
 handleEvent (EventKey (Char c) Down m _) ss 
     | ord c == 8 = do
-        nn <- uses inputBuffer (not.null)
+        nn <- uses (input.buffer) (not.null)
         when nn $
-            inputBuffer %= init
+            (input.buffer) %= init
         return ss
     | otherwise = do
-        inputBuffer %= (++[if shift m == Down then toUpper c else c])
+        (input.buffer) %= (++[if shift m == Down then toUpper c else c])
         return ss 
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) ss = do
-    inputBuffer %= (++[' '])
+    (input.buffer) %= (++[' '])
     return ss
 handleEvent (EventKey (SpecialKey KeyShiftR) Down _ _) ss = return ss
 handleEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
-    st <- use inputSearch
+    st <- use (input.search)
     when (isNothing st) $ do
-        curCode <- use inputBuffer
-        inputSearch .= Just curCode
-    searchTerm <- use inputSearch
-    ip <- use inputHistoryPointer
-    prefix <- uses inputHistory (reverse . take ip)
+        curCode <- use (input.buffer)
+        (input.search) .= Just curCode
+    searchTerm <- use (input.search)
+    ip <- use (input.historyPointer)
+    prefix <- uses (input.history) (reverse . take ip)
     case find (fromJust searchTerm `isPrefixOf`) prefix of
         Nothing -> return ss
         Just pCode -> do
-            inputHistoryPointer .= fromJust (elemIndex pCode (reverse prefix))
-            inputBuffer .= pCode
+            (input.historyPointer) .= fromJust (elemIndex pCode (reverse prefix))
+            (input.buffer) .= pCode
             return ss
 handleEvent (EventKey (SpecialKey KeyEnter) Down _ _) ss = do
-    code <- use inputBuffer
-    inputHistory %= (++[code])
-    ihLen <- uses inputHistory length
-    inputHistoryPointer .= ihLen
-    inputBuffer .= ""
-    inputSearch .= Nothing
+    code <- use (input.buffer)
+    (input.history) %= (++[code])
+    ihLen <- uses (input.history) length
+    (input.historyPointer) .= ihLen
+    (input.buffer) .= ""
+    (input.search) .= Nothing
     executeResponses $ executeCommand code ss
 handleEvent (EventResize (x,y)) ss = do
     (fx,fy) <- use $ settings.fontDimensions
@@ -180,3 +138,23 @@ stepFrontend :: Float -> StateStack -> TAIO StateStack
 stepFrontend t ss = do
     elapsedTime %= (+t)
     return ss
+
+renderHandler :: (StateStack,FrontendState) -> IO Picture
+renderHandler (ss,fs) = evalStateT (renderFrontend ss) fs
+
+screenEffect :: TAIO Picture
+screenEffect = do
+    (cw,ch) <- uses (settings.dimensions) (bimap fromIntegral fromIntegral)
+    (fw,fh) <- uses (settings.fontDimensions) (bimap fromIntegral fromIntegral)
+    let w = fw*cw
+    let h = fh*ch
+    return $ Translate (fw*(-cw/2)) (fh*(ch/2)) $ 
+        Pictures $ map (\y -> Color (makeColor 0 (fromIntegral (mod y 2)) 0 0.1) $ rect (0,-2*fromIntegral y) (w,2)) [0..div (round h-1) 2]
+
+renderFrontend :: StateStack -> TAIO Picture
+renderFrontend ss = do
+    ws <- uses windows M.elems
+    se <- screenEffect
+    mapM_ (renderWindow ss) ws
+    cv <- renderCanvas
+    return $ Pictures [se,cv]

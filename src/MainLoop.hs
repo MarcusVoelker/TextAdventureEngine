@@ -15,7 +15,6 @@ import Map.Room
 import Sound.Engine
 import Engine
 import Frontend.Frontend
-import Frontend.Window
 
 import Graphics.Gloss.Interface.IO.Game
 
@@ -52,28 +51,10 @@ mainOpenGL :: String -> StateStack -> IO ()
 mainOpenGL title ss = do
     let ifs = initialFrontendState (120,40) (8,16)
     playIO
-        (InWindow title (120*8,40*16) (500,200))
+        (InWindow title (120*8+1,40*16+1) (500,200))
         black
         60
         (ss,ifs)
         renderHandler
         eventHandler
         updateHandler
-
-renderHandler :: (StateStack,FrontendState) -> IO Picture
-renderHandler (ss,fs) = evalStateT (renderFrontend ss) fs
-
-screenEffect :: TAIO Picture
-screenEffect = do
-    (cw,ch) <- uses (settings.dimensions) (bimap fromIntegral fromIntegral)
-    (fw,fh) <- uses (settings.fontDimensions) (bimap fromIntegral fromIntegral)
-    let w = fw*cw
-    let h = fh*ch
-    return $ Translate (fw*(-cw/2)) (fh*(ch/2)) $ 
-        Pictures $ map (\y -> Color (makeColor 0 (fromIntegral (mod y 2)) 0 0.1) $ rect (0,-2*fromIntegral y) (w,2)) [0..div (round h-1) 2]
-
-renderFrontend :: StateStack -> TAIO Picture
-renderFrontend ss = do
-    ws <- uses windows M.elems
-    se <- screenEffect
-    Pictures . (++[se]) <$> mapM (renderWindow ss) ws
