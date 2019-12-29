@@ -5,11 +5,11 @@ import Frontend.Canvas
 import Logic.StateStack
 
 import Control.Lens
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 
 type WHandle = Int
 
-type View = StateStack -> FrontendState -> [String]
+type ContentView = StateStack -> FrontendState -> [String]
 
 data ScreenLoc = Absolute Int | Relative Float
 data LocKind = X | Y
@@ -20,7 +20,7 @@ data Window = Window {
     _windowTop :: ScreenLoc,
     _windowRight :: ScreenLoc,
     _windowBottom :: ScreenLoc,
-    _windowView :: View,
+    _windowContentView :: ContentView,
     _windowContext :: Int
 }
 

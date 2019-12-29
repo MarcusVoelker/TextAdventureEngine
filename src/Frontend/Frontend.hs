@@ -4,7 +4,7 @@ import Frontend.Canvas
 import Frontend.CanvasRenderer
 import Frontend.Primitives
 import Frontend.State
-import Frontend.TAIO
+import Frontend.FrontState
 import Frontend.Window
 
 import Logic.Dialogue
@@ -16,9 +16,10 @@ import Logic.StateStack
 import Engine
 
 import Control.Exception
-import Control.Lens hiding (view)
+import Control.Lens
 import Control.Monad
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
 import Data.Char
 import Data.List
@@ -29,34 +30,38 @@ import System.IO (hFlush, stdout)
 
 import Graphics.Gloss.Interface.IO.Game
 
-openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> View -> Int -> TAIO ()
+openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> ContentView -> Int -> FrontMod ()
 openTopWindow x y w h v c = do
     hand <- (+1) . maximum . M.keys <$> use windows
     let win = Window hand x y w h v c
     windows %= M.insert hand win
 
-closeContextWindows :: Int -> TAIO ()
+closeContextWindows :: Int -> FrontMod ()
 closeContextWindows c = windows %= M.filter (\w -> w^.context /= c)
 
-executeResponse :: StateStack -> Response -> TAIO StateStack
+executeResponse :: StateStack -> Response -> FrontMod StateStack
 executeResponse ss (TextResponse s) = do
     textHistory %= (++lines s)
     return ss
 executeResponse ss (InitiateDialogueResponse d) = do
+    let ss' = openContext (DialogueState d) ss
     openTopWindow 
         (Absolute 2)
         (Absolute 2) 
         (Absolute (-4)) 
         (Absolute (-8))
-        (\ss _ -> [head(ss^.stack)^.dialogue.response])
+        (\ss _ -> case ss^.stack of 
+            [] -> ["Nobody here but us chickens!"]
+            (x:xs) -> [x^.dialogue.response]
+            )
         (contextCount ss + 1)
-    return $ openContext (DialogueState d) ss
+    return ss'
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
     return $ closeContext ss
 executeResponse ss QuitResponse = lift exitSuccess
 
-executeResponses :: Responding StateStack -> TAIO StateStack
+executeResponses :: Responding StateStack -> FrontMod StateStack
 executeResponses (Responding responses ss) = foldM executeResponse ss responses
 
 initialInputState :: InputState 
@@ -69,20 +74,20 @@ initialFrontendState (w,h) (fw,fh) = FrontendState
     initialCanvasState
     (M.fromList [
         (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.input.buffer)]) 0),
-        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-3)) (\_ fs -> fs^.textHistory) 0)
+        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-4)) (\_ fs -> fs^.textHistory) 0)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
     0
 
-runFrontend :: (Int,Int) -> (Int,Int) -> TAIO () -> IO ()
-runFrontend dims fdims action = do 
-    let irs = initialFrontendState dims fdims
-    void $ execStateT action irs
-
 eventHandler :: Event -> (StateStack,FrontendState) -> IO (StateStack,FrontendState)
-eventHandler e (ss,fs) = runStateT (handleEvent e ss) fs
+eventHandler e (ss,fs) = runStateT (do
+    r <- handleEvent e ss
+    ws <- uses windows M.elems
+    mapM_ (renderWindow ss) ws
+    return r
+    ) fs
 
-handleEvent :: Event -> StateStack -> TAIO StateStack
+handleEvent :: Event -> StateStack -> FrontMod StateStack
 handleEvent (EventKey (Char c) Down m _) ss 
     | ord c == 8 = do
         nn <- uses (input.buffer) (not.null)
@@ -134,27 +139,27 @@ handleEvent e ss = do
 updateHandler :: Float -> (StateStack,FrontendState) -> IO (StateStack,FrontendState)
 updateHandler t (ss,fs) = runStateT (stepFrontend t ss) fs
 
-stepFrontend :: Float -> StateStack -> TAIO StateStack
+stepFrontend :: Float -> StateStack -> FrontMod StateStack
 stepFrontend t ss = do
     elapsedTime %= (+t)
+    ws <- uses windows M.elems
+    mapM_ (renderWindow ss) ws
     return ss
 
 renderHandler :: (StateStack,FrontendState) -> IO Picture
-renderHandler (ss,fs) = evalStateT (renderFrontend ss) fs
+renderHandler (ss,fs) = runReaderT (renderFrontend ss) fs
 
-screenEffect :: TAIO Picture
+screenEffect :: FrontRead Picture
 screenEffect = do
-    (cw,ch) <- uses (settings.dimensions) (bimap fromIntegral fromIntegral)
-    (fw,fh) <- uses (settings.fontDimensions) (bimap fromIntegral fromIntegral)
+    (cw,ch) <- views (settings.dimensions) (bimap fromIntegral fromIntegral)
+    (fw,fh) <- views (settings.fontDimensions) (bimap fromIntegral fromIntegral)
     let w = fw*cw
     let h = fh*ch
     return $ Translate (fw*(-cw/2)) (fh*(ch/2)) $ 
         Pictures $ map (\y -> Color (makeColor 0 (fromIntegral (mod y 2)) 0 0.1) $ rect (0,-2*fromIntegral y) (w,2)) [0..div (round h-1) 2]
 
-renderFrontend :: StateStack -> TAIO Picture
+renderFrontend :: StateStack -> FrontRead Picture
 renderFrontend ss = do
-    ws <- uses windows M.elems
     se <- screenEffect
-    mapM_ (renderWindow ss) ws
     cv <- renderCanvas
     return $ Pictures [se,cv]
