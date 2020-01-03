@@ -11,6 +11,7 @@ import Control.Lens.Lens
 import qualified Data.Map as M
 
 data UseEvent = UnlockDoor {
+    _useEventDirection :: String,
     _useEventItem :: Item,
     _useEventNewRoom :: Room
 }

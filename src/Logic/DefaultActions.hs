@@ -77,7 +77,7 @@ exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do
     dyns <- use dynamicDoors
     case dyns M.!? r >>= lookup s of
-        Just t -> return $ Right r
+        Just t -> return $ Right t
         Nothing -> case (r^.getExit) s of
             Right r' -> return $ Right r'
             Left err -> return $ Left err
@@ -107,11 +107,11 @@ addDoor :: Room -> String -> Room -> GameAction ()
 addDoor s n t = dynamicDoors %= M.insertWith (++) s [(n,t)]
 
 runEvent :: UseEvent -> Item -> Entity -> GameAction ()
-runEvent (UnlockDoor key target) item entity 
+runEvent (UnlockDoor dir key target) item entity 
     | key == item = do
         r <- use (player.location)
         removeEntity r entity
-        addDoor r (entity^.name) target
+        addDoor r dir target
     | otherwise = respondText "This doesn't fit!"
 
 useOn :: String -> String -> GameAction ()
