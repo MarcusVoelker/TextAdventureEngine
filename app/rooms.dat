@@ -1,11 +1,11 @@
-Room init
+Room i
   name: "Start"
   description: "An empty room. There is an exit to the north."
-  exits: [("n","fdsa")]
+  exits: [("north","fdsa")]
 Room fdsa
   name: "Other"
   description: "A sunlit room with a piano in it. The archway to the south is crumbled."
 Room asdf
   name: "Locked"
   description: "A pitch black room."
-  exits: [("w","fdsa")]
+  exits: [("west","fdsa")]

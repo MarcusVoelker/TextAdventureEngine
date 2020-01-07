@@ -33,7 +33,7 @@ import Graphics.Gloss.Interface.IO.Game
 openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> ContentView -> Int -> FrontMod ()
 openTopWindow x y w h v c = do
     hand <- (+1) . maximum . M.keys <$> use windows
-    let win = Window hand x y w h v c
+    let win = Window hand x y w h v c singleStyle
     windows %= M.insert hand win
 
 closeContextWindows :: Int -> FrontMod ()
@@ -52,7 +52,7 @@ executeResponse ss (InitiateDialogueResponse d) = do
         (Absolute (-8))
         (\ss _ -> case ss^.stack of 
             [] -> ["Nobody here but us chickens!"]
-            (x:xs) -> [x^.dialogue.response]
+            (x:_) -> [x^.dialogue.response]
             )
         (contextCount ss + 1)
     return ss'
@@ -73,8 +73,8 @@ initialFrontendState (w,h) (fw,fh) = FrontendState
     initialInputState
     initialCanvasState
     (M.fromList [
-        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.input.buffer)]) 0),
-        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-4)) (\_ fs -> fs^.textHistory) 0)
+        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.input.buffer)]) 0 doubleStyle),
+        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-4)) (\_ fs -> fs^.textHistory) 0 doubleStyle)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
     0
@@ -100,6 +100,7 @@ handleEvent (EventKey (Char c) Down m _) ss
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) ss = do
     (input.buffer) %= (++[' '])
     return ss
+handleEvent (EventKey (SpecialKey KeyShiftL) Down _ _) ss = return ss
 handleEvent (EventKey (SpecialKey KeyShiftR) Down _ _) ss = return ss
 handleEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
     st <- use (input.search)
@@ -147,7 +148,7 @@ stepFrontend t ss = do
     return ss
 
 renderHandler :: (StateStack,FrontendState) -> IO Picture
-renderHandler (ss,fs) = runReaderT (renderFrontend ss) fs
+renderHandler (_,fs) = runReaderT renderFrontend fs
 
 screenEffect :: FrontRead Picture
 screenEffect = do
@@ -158,8 +159,8 @@ screenEffect = do
     return $ Translate (fw*(-cw/2)) (fh*(ch/2)) $ 
         Pictures $ map (\y -> Color (makeColor 0 (fromIntegral (mod y 2)) 0 0.1) $ rect (0,-2*fromIntegral y) (w,2)) [0..div (round h-1) 2]
 
-renderFrontend :: StateStack -> FrontRead Picture
-renderFrontend ss = do
+renderFrontend :: FrontRead Picture
+renderFrontend = do
     se <- screenEffect
     cv <- renderCanvas
     return $ Pictures [se,cv]

@@ -35,9 +35,9 @@ fullParser r e i c = do
     rMap <- fst <$> pFunc (tokenizer >>> blocker >>> rooms) r
     iMap <- fst <$> pFunc (tokenizer >>> blocker >>> items) i
     es <- fst <$> pFunc (tokenizer >>> blocker >>> Parser.EntityParser.entities rMap iMap) e
-    cf <- fst <$> pFunc (tokenizer >>> blocker >>> config) c
-    let initial = initialState (fromJust $ M.lookup "init" rMap) []
-    return $ (cf,) $ (^.result) $ (\gs -> StateStack gs []) <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
+    (t,iR) <- fst <$> pFunc (tokenizer >>> blocker >>> config) c
+    let initial = initialState (fromJust $ M.lookup iR rMap) []
+    return $ (t,) $ (^.result) $ (\gs -> StateStack gs []) <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
 runGame :: IO ()
 runGame = withEngine soundEngine $ do

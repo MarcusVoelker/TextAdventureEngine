@@ -1,2 +1,3 @@
 Config main
   windowTitle: "Demo Game"
+  initialRoom : "i"

@@ -5,6 +5,24 @@ import Frontend.Primitives
 import qualified Data.Map.Strict as M
 import Graphics.Gloss
 
+bSHLine = '─'
+bSVLine = '│'
+bSTRCorner = '┐'
+bSTLCorner = '┌'
+bSBRCorner = '┘'
+bSBLCorner = '└'
+bDHLine = '═'
+bDVLine = '║'
+bDTRCorner = '╗'
+bDTLCorner = '╔'
+bDBRCorner = '╝'
+bDBLCorner = '╚'
+
+-- ┤	╡	╢	╖	╕	╣				╜	╛	
+-- 	┴	┬	├		┼	╞	╟			╩	╦	╠		╬	╧
+-- ╨	╤	╥	╙	╘	╒	╓	╫	╪		
+
+
 chars :: M.Map Char Picture
 chars = M.fromList [
     ('A',Pictures [
@@ -473,7 +491,58 @@ chars = M.fromList [
         vline (2,11) 4,
         vline (4,11) 4
     ]),
-    ('\'',vline (3,11) 4)
+    ('\'',vline (3,11) 4),
+-- Box drawing
+    (bSVLine, vline (3,0) 16),
+    (bSHLine, hline (0,7) 8),
+    (bSTLCorner, Pictures [
+        vline (3,0) 8,
+        hline (4,7) 4
+    ]),
+    (bSTRCorner, Pictures [
+        vline (3,0) 8,
+        hline (0,7) 4
+    ]),
+    (bSBLCorner, Pictures [
+        vline (3,7) 9,
+        hline (3,7) 5
+    ]),
+    (bSBRCorner, Pictures [
+        vline (3,8) 8,
+        hline (0,7) 4
+    ]),
+    (bDVLine, Pictures [
+        vline (2,0) 16,
+        vline (5,0) 16
+    ]),
+    (bDHLine, Pictures[
+        hline (0,6) 8,
+        hline (0,9) 8
+    ]),
+    (bDTLCorner, Pictures [
+        vline (2,0) 9,
+        vline (5,0) 6,
+        hline (2,9) 6,
+        hline (5,6) 3
+    ]),
+    (bDTRCorner, Pictures [
+        vline (2,0) 6,
+        vline (5,0) 9,
+        hline (0,9) 6,
+        hline (0,6) 3
+    ]),
+    (bDBLCorner, Pictures [
+        vline (2,6) 10,
+        vline (5,9) 7,
+        hline (2,6) 6,
+        hline (5,9) 3
+    ]),
+    (bDBRCorner, Pictures [
+        vline (2,9) 7,
+        vline (5,6) 10,
+        hline (0,9) 3,
+        hline (0,6) 6
+    ])
     ]
 
 renderChar :: Char -> Picture

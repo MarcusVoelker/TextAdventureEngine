@@ -14,6 +14,15 @@ type ContentView = StateStack -> FrontendState -> [String]
 data ScreenLoc = Absolute Int | Relative Float
 data LocKind = X | Y
 
+data WindowStyle = WindowStyle {
+    _windowStyleHStyle :: Char,
+    _windowStyleVStyle :: Char,
+    _windowStyleCTLStyle :: Char,
+    _windowStyleCTRStyle :: Char,
+    _windowStyleCBLStyle :: Char,
+    _windowStyleCBRStyle :: Char
+}
+
 data Window = Window {
     _windowHandle :: WHandle,
     _windowLeft :: ScreenLoc,
@@ -21,7 +30,8 @@ data Window = Window {
     _windowRight :: ScreenLoc,
     _windowBottom :: ScreenLoc,
     _windowContentView :: ContentView,
-    _windowContext :: Int
+    _windowContext :: Int,
+    _windowStyle :: WindowStyle
 }
 
 data FrontendSettings = FrontendSettings {
@@ -50,5 +60,7 @@ makeFields ''InputState
 makeFields ''FrontendState
 
 makeFields ''FrontendSettings
+
+makeFields ''WindowStyle
 
 makeFields ''Window

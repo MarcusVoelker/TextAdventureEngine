@@ -29,7 +29,7 @@ room rs = do
         idt
         name
         description
-        (defaultGetExit (`lookup` exs))
+        (M.fromList exs)
 
 rooms :: Parser r [Token] (M.Map String Room)
 rooms = pfix $ \rs -> do

@@ -30,6 +30,9 @@ look = do
     r <- use (player.location) 
     roomDescription r >>= respondText
     es <- M.findWithDefault [] r <$> use entities 
+    dyns <- use dynamicDoors
+    let exs = M.keys (r^.exits) ++ map fst (fromMaybe [] (dyns M.!? r))
+    unless (null exs) $ if length exs == 1 then respondText ("\nThere is an exit to the " ++ unwords exs) else respondText ("\nThere are exits to the " ++ intercalate ", " exs)
     unless (null es) $ do
         respondText "\nYou see here:"
         forM_ es $ \e -> respondText $ "    " ++ (e^.name)
@@ -75,12 +78,20 @@ talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse (DialogueTr
 
 exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do
+    let s' = case s of
+            "n" -> "north"
+            "s" -> "south"
+            "w" -> "west"
+            "e" -> "east"
+            "u" -> "up"
+            "d" -> "down"
+            _ -> s
     dyns <- use dynamicDoors
-    case dyns M.!? r >>= lookup s of
+    case dyns M.!? r >>= lookup s' of
         Just t -> return $ Right t
-        Nothing -> case (r^.getExit) s of
-            Right r' -> return $ Right r'
-            Left err -> return $ Left err
+        Nothing -> case (r^.exits) M.!? s' of
+            Just r' -> return $ Right r'
+            Nothing -> return $ Left ("I see no way to go " ++ s')
 
 go :: String -> GameAction ()
 go e = do

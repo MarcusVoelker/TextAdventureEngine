@@ -17,8 +17,9 @@ import Data.List
 import qualified Data.Map as M
 import Data.Maybe
 
-config :: Parser r [Token] String
+config :: Parser r [Token] (String,String)
 config = do
     (Object T.Config "main" ps) <- object
     (SProp title) <- return $ fromMaybe (SProp "Untitled Text Adventure") (lookup "windowTitle" ps)
-    return title
+    (SProp iR) <- return $ fromMaybe (SProp "init") (lookup "initialRoom" ps)
+    return (title,iR)

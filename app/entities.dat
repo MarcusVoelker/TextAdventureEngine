@@ -11,4 +11,4 @@ Entity sdoor
   name: "Silvered Door"
   description: "A door with a silvery lock"
   location: "fdsa"
-  accepts: [("skey",("unlockDoor",("e","asdf")))]
+  accepts: [("skey",("unlockDoor",("east","asdf")))]
