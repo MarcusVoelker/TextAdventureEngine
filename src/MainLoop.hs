@@ -1,17 +1,14 @@
 module MainLoop where
 
-import Parser.ActionParser
 import Parser.ConfigParser
 import Parser.EntityParser
 import Parser.ItemParser
 import Parser.RoomParser
 import Parser.Tokenizer
 import Logic.GameState
-import Logic.DefaultActions
 import Logic.Interaction
 import Logic.Response
 import Logic.StateStack
-import Map.Room
 import Sound.Engine
 import Engine
 import Frontend.Frontend
@@ -23,10 +20,7 @@ import Text.LParse.Parser
 import Control.Arrow hiding (left)
 import Control.DoubleContinuations
 import Control.Lens hiding (view)
-import Control.Monad
 import Control.Monad.Trans.State
-import Control.Monad.Trans.Class
-import Data.Bifunctor
 import Data.Maybe
 import qualified Data.Map.Strict as M
 

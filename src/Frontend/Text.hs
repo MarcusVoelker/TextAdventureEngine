@@ -5,17 +5,40 @@ import Frontend.Primitives
 import qualified Data.Map.Strict as M
 import Graphics.Gloss
 
+bSHLine :: Char
 bSHLine = '─'
+
+bSVLine :: Char
 bSVLine = '│'
+
+bSTRCorner :: Char
 bSTRCorner = '┐'
+
+bSTLCorner :: Char
 bSTLCorner = '┌'
+
+bSBRCorner :: Char
 bSBRCorner = '┘'
+
+bSBLCorner :: Char
 bSBLCorner = '└'
+
+bDHLine :: Char
 bDHLine = '═'
+
+bDVLine :: Char
 bDVLine = '║'
+
+bDTRCorner :: Char
 bDTRCorner = '╗'
+
+bDTLCorner :: Char
 bDTLCorner = '╔'
+
+bDBRCorner :: Char
 bDBRCorner = '╝'
+
+bDBLCorner :: Char
 bDBLCorner = '╚'
 
 -- ┤	╡	╢	╖	╕	╣				╜	╛	

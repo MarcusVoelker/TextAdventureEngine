@@ -2,6 +2,7 @@ module Frontend.FrontState where
 
 import Frontend.State
 
+import Control.Exception
 import Control.Lens
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
@@ -18,6 +19,7 @@ resolveLocation X (Absolute x) = do
 resolveLocation Y (Absolute x) = do
         max <- views (settings.dimensions) snd
         return $ max + x
+resolveLocation _ _  = lift $ throwIO $ PatternMatchFail "Relative locations not implemented!"
 
 liftRead :: FrontRead a -> FrontMod a
 liftRead fr = StateT $ \e -> fmap (,e) (runReaderT fr e)

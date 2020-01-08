@@ -1,20 +1,16 @@
 module Parser.EntityParser where
 
-import Parser.Tokenizer hiding (Keyword(Room), Keyword(Entity))
-import qualified Parser.Tokenizer as T (Keyword(Room), Keyword(Entity))
+import Parser.Tokenizer hiding (Keyword(Entity))
+import qualified Parser.Tokenizer as T (Keyword(Entity))
 import Parser.ObjectParser
 
 import Logic.Entity
 import Logic.Item
 import Map.Room
 
-import Control.DoubleContinuations
 import Text.LParse.Parser
-import Text.LParse.Prebuilt
 
 import Control.Applicative
-import Control.Monad
-import Data.List
 import qualified Data.Map as M
 import Data.Maybe
 

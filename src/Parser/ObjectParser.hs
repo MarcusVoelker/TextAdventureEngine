@@ -2,7 +2,6 @@ module Parser.ObjectParser where
 
 import Parser.Tokenizer
 
-import Control.DoubleContinuations
 import Text.LParse.Parser
 import Text.LParse.Prebuilt
 

@@ -11,9 +11,6 @@ import Logic.StateStack
 import Control.Lens
 import Control.Monad
 import Control.Monad.Trans.State
-import Control.Monad.Trans.Class
-import qualified Data.Map.Strict as M
-import Graphics.Gloss
 
 singleStyle :: WindowStyle
 singleStyle = WindowStyle
@@ -35,7 +32,6 @@ doubleStyle = WindowStyle
 
 renderWindow :: StateStack -> Window -> FrontMod ()
 renderWindow ss win = do
-    (cw,ch) <- use (settings.dimensions)
     x <- liftRead $ resolveLocation X (win^.left)
     y <-  liftRead $ resolveLocation Y (win^.top)
     x' <- liftRead $ resolveLocation X (win^.right) 

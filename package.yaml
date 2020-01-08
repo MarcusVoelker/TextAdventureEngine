@@ -35,6 +35,8 @@ library:
   ghc-options:
   - -O2
   - -Wall
+  - -Wno-name-shadowing
+  - -Wno-type-defaults
 
 executables:
   TextAdventureEngine-exe:

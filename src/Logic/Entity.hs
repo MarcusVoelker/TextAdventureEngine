@@ -7,7 +7,6 @@ import Thing
 import Map.Room
 
 import Control.Lens
-import Control.Lens.Lens
 import qualified Data.Map as M
 
 data UseEvent = UnlockDoor {

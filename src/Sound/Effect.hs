@@ -13,6 +13,7 @@ type Effect = (Sample,Float,Float,Float,Float)
 playEffect :: Effect -> IO ()
 playEffect (s,l,r,d,p) = soundPlay s l r d p
 
+{-
 waitPayback = do
   n <- soundActive
   when (n > 0) $ do
@@ -44,3 +45,4 @@ main = do
     waitPayback
 
     finishAudio
+-}

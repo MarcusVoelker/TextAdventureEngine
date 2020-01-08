@@ -9,11 +9,8 @@ import Frontend.Window
 
 import Logic.Dialogue
 import Logic.Driver
-import Logic.GameState
 import Logic.Response
 import Logic.StateStack
-
-import Engine
 
 import Control.Exception
 import Control.Lens
@@ -26,7 +23,6 @@ import Data.List
 import qualified Data.Map.Strict as M
 import Data.Maybe
 import System.Exit
-import System.IO (hFlush, stdout)
 
 import Graphics.Gloss.Interface.IO.Game
 
@@ -59,7 +55,8 @@ executeResponse ss (InitiateDialogueResponse d) = do
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
     return $ closeContext ss
-executeResponse ss QuitResponse = lift exitSuccess
+executeResponse _ QuitResponse = lift exitSuccess
+executeResponse _ _ = lift $ throwIO $ PatternMatchFail "Unhandled Response!"
 
 executeResponses :: Responding StateStack -> FrontMod StateStack
 executeResponses (Responding responses ss) = foldM executeResponse ss responses

@@ -1,7 +1,6 @@
 module Engine where
 
 import Control.Exception
-import Data.Monoid
 
 data Engine = Engine { setup :: IO (), teardown :: IO ()}
 

@@ -1,7 +1,5 @@
 module Frontend.Canvas where
 
-import Frontend.Text
-
 import Control.Lens
 import qualified Data.Map.Strict as M
 

@@ -7,12 +7,9 @@ import Parser.ObjectParser
 import Map.Room
 import Thing
 
-import Control.DoubleContinuations
 import Text.LParse.Parser
-import Text.LParse.Prebuilt
 
 import Control.Applicative
-import Control.Monad
 import Control.Lens.Getter
 import Data.List
 import Data.Maybe

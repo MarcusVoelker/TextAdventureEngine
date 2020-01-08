@@ -8,8 +8,6 @@ import Frontend.Text
 
 import Control.Lens
 import Control.Monad
-import Control.Monad.Trans.Class
-import Data.Bifunctor
 import qualified Data.Map.Strict as M
 import Data.Maybe
 import Graphics.Gloss

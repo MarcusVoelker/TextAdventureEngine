@@ -2,9 +2,7 @@ module Logic.Response where
 
 import Logic.Dialogue
 
-import Control.Applicative
 import Control.Lens
-import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 
