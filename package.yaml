@@ -32,6 +32,9 @@ dependencies:
 library:
   source-dirs: src
   default-extensions: TupleSections, LambdaCase, TemplateHaskell, MultiParamTypeClasses, TypeSynonymInstances, FunctionalDependencies, FlexibleInstances, AllowAmbiguousTypes
+  ghc-options:
+  - -O2
+  - -Wall
 
 executables:
   TextAdventureEngine-exe:
@@ -41,6 +44,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -O2
     dependencies:
     - TextAdventureEngine
 

@@ -1,7 +1,7 @@
 Entity key
   name: "Silver Key"
   description: "A silver key with scuff marks all over its length"
-  location: "fdsa"
+  location: "w"
   item: "skey"
 Entity piano
   name: "Broken Piano"

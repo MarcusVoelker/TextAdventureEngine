@@ -74,7 +74,11 @@ initialFrontendState (w,h) (fw,fh) = FrontendState
     initialCanvasState
     (M.fromList [
         (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.input.buffer)]) 0 doubleStyle),
-        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-4)) (\_ fs -> fs^.textHistory) 0 doubleStyle)
+        (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-4)) (\_ fs -> 
+            let (_,ch) = fs^.settings.dimensions
+                th     = fs^.textHistory 
+                in
+            drop (max 0 (length th-ch+4)) th) 0 doubleStyle)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
     0
@@ -143,8 +147,6 @@ updateHandler t (ss,fs) = runStateT (stepFrontend t ss) fs
 stepFrontend :: Float -> StateStack -> FrontMod StateStack
 stepFrontend t ss = do
     elapsedTime %= (+t)
-    ws <- uses windows M.elems
-    mapM_ (renderWindow ss) ws
     return ss
 
 renderHandler :: (StateStack,FrontendState) -> IO Picture

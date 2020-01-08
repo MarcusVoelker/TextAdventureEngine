@@ -5,7 +5,16 @@ Room i
 Room fdsa
   name: "Other"
   description: "A sunlit room with a piano in it. The archway to the south is crumbled."
+  exits: [("north","n"),("west","w")]
+Room n
+  name: "North"
+  description: "A large room, dimly lit by candles. There is a mirror on the opposite side of the room."
+  exits: [("south","fdsa")]
+Room w
+  name: "West"
+  description: "A small, dusty closet filled with bottles of all shapes and sizes."
+  exits: [("east","fdsa")]
 Room asdf
   name: "Locked"
-  description: "A pitch black room."
+  description: "A pitch black room. Light is streaming from the doorway to the west."
   exits: [("west","fdsa")]

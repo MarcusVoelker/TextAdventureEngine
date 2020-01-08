@@ -40,8 +40,6 @@ renderWindow ss win = do
     y <-  liftRead $ resolveLocation Y (win^.top)
     x' <- liftRead $ resolveLocation X (win^.right) 
     y' <- liftRead $ resolveLocation Y (win^.bottom)
-    let w = x'-x + 1
-    let h = y'-y + 1
     let v = win^.contentView
     let hnd = win^.handle
     let sty = win^.style

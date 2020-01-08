@@ -32,7 +32,7 @@ look = do
     es <- M.findWithDefault [] r <$> use entities 
     dyns <- use dynamicDoors
     let exs = M.keys (r^.exits) ++ map fst (fromMaybe [] (dyns M.!? r))
-    unless (null exs) $ if length exs == 1 then respondText ("\nThere is an exit to the " ++ unwords exs) else respondText ("\nThere are exits to the " ++ intercalate ", " exs)
+    unless (null exs) $ if length exs == 1 then respondText ("\nThere is an exit to the " ++ unwords exs) else respondText ("\nThere are exits to the " ++ intercalate ", " (init exs) ++ " and " ++ last exs)
     unless (null es) $ do
         respondText "\nYou see here:"
         forM_ es $ \e -> respondText $ "    " ++ (e^.name)
