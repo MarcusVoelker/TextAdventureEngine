@@ -11,7 +11,6 @@ import Text.LParse.Parser
 
 import Control.Applicative
 import Control.Lens.Getter
-import Data.List
 import Data.Maybe
 import qualified Data.Map.Strict as M
 

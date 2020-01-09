@@ -1,9 +1,7 @@
 module Parser.ActionParser where
 
-import Logic.GameState
 import Logic.Interaction
 import Logic.DefaultActions
-import Map.Room
 
 import Text.LParse.Parser
 import Text.LParse.Prebuilt

@@ -12,10 +12,7 @@ import Map.Room
 import Thing
 
 import Control.Lens
-import Control.Lens.Getter
 import Control.Monad
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.State
 import Data.List
 import qualified Data.Map as M
 import Data.Maybe

@@ -1,11 +1,5 @@
 module Sound.Effect where
 
-import Control.Monad
-import System.Environment
-import System.FilePath
-import qualified Data.ByteString as SB
-import Control.Concurrent
-
 import Sound.ProteaAudio
 
 type Effect = (Sample,Float,Float,Float,Float)
