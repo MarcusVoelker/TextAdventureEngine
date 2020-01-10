@@ -40,14 +40,24 @@ useAction = do
     words <- sepSome (void $ some $ consumeSingle ' ') word
     eoi 
     if "on" `elem` words then
-        (\(n,_:m) -> return $ useOn (unwords n) (unwords m))$ break (=="on") words
+        (\(n,_:m) -> return $ useOn (unwords n) (unwords m)) $ break (=="on") words
     else
         fail "expected 'on'"
+
+goSynonym :: Parser r String (GameAction ())
+goSynonym = do
+    t0 <- tokenReturn
+    eoi
+    if t0 `elem` "nsweud" then
+        return $ go [t0]
+    else
+        fail "unknown go synonym"
 
 action :: Parser r String (GameAction ())
 action = lookAction
     <|> takeAction
     <|> talkAction
     <|> useAction
+    <|> goSynonym
     <|> (consume "inventory" >> return viewInv << eoi)
     <|> (go <$> (consume "go " >> full << eoi))
