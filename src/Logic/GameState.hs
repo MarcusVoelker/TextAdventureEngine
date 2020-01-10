@@ -19,11 +19,11 @@ data GameState = GameState {
 
 makeFields ''GameState
 
-initialState :: Room -> [String] -> GameState
+initialState :: Room -> M.Map String Int -> GameState
 initialState r vs = 
     GameState 
         (Player r M.empty) 
-        (M.fromList $ map (,0) vs) 
+        vs 
         M.empty
         0
         M.empty

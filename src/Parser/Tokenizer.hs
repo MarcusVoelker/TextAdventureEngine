@@ -7,7 +7,7 @@ import Text.LParse.Prebuilt
 
 data Token = Keyword Keyword | SLit String | Identifier String | Op Operator | Indent Int | Whitespace | Separator | BlockStart | BlockEnd deriving (Show,Eq)
 
-data Keyword = Room | Entity | Item | Config deriving (Show,Eq)
+data Keyword = Room | Entity | Item | Config | Variable deriving (Show,Eq)
 
 data Operator = Colon | LBrack | RBrack | LParen | RParen | Comma deriving (Show,Eq)
 
@@ -16,6 +16,7 @@ keyword = consumeReturn "Room" (Keyword Room)
     <|> consumeReturn "Entity" (Keyword Entity)
     <|> consumeReturn "Item" (Keyword Item)
     <|> consumeReturn "Config" (Keyword Config)
+    <|> consumeReturn "Variable" (Keyword Variable)
 
 slit :: Parser r String Token
 slit = SLit <$> surround "\"\"" (many (nParse (/= '"') tokenReturn "Internal Error"))
