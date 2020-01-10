@@ -75,7 +75,7 @@ initialFrontendState (w,h) (fw,fh) = FrontendState
             let (_,ch) = fs^.settings.dimensions
                 th     = fs^.textHistory 
                 in
-            drop (max 0 (length th-ch+4)) th) 0 doubleStyle)
+            drop (max 0 (length th-ch+5)) th) 0 doubleStyle)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
     0
