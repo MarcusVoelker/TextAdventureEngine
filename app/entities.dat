@@ -1,14 +1,10 @@
 Entity key
   name: "Silver Key"
   description: "A silver key with scuff marks all over its length"
-  location: "w"
+  location: "s"
   item: "skey"
-Entity piano
-  name: "Broken Piano"
-  description: "A piano that doesn't work"
-  location: "fdsa"
 Entity sdoor
   name: "Silvered Door"
   description: "A door with a silvery lock"
-  location: "fdsa"
-  accepts: [("skey",("unlockDoor",("east","asdf")))]
+  location: "s"
+  accepts: [("skey",("unlockDoor",("east","pm")))]
