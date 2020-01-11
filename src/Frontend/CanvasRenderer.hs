@@ -53,3 +53,6 @@ clearCell :: (Int,Int) -> FrontMod ()
 clearCell pos = do
     c <- use (canvas.grid.at pos)
     when (isJust c && (fromJust c^.content /= BlankCell)) $ writeToCanvas pos BlankCell
+
+clearCanvas :: FrontMod () 
+clearCanvas = (canvas.grid) .= M.empty

@@ -75,7 +75,7 @@ initialFrontendState (w,h) (fw,fh) = FrontendState
             let (_,ch) = fs^.settings.dimensions
                 th     = fs^.textHistory 
                 in
-            drop (max 0 (length th-ch+5)) th) 0 doubleStyle)
+            drop (max 0 (length th-ch+5)) th) 0 singleStyle)
         ]) 
     (FrontendSettings (w,h) (fw,fh))
     0
@@ -130,6 +130,7 @@ handleEvent (EventResize (x,y)) ss = do
     let nx = div x fx
     let ny = div y fy
     (settings.dimensions) .= (nx,ny)
+    clearCanvas
     return ss
 handleEvent (EventKey _ Up _ _) ss = return ss
 handleEvent (EventKey (MouseButton _) _ _ _) ss = return ss
