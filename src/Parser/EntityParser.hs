@@ -5,6 +5,7 @@ import qualified Parser.Tokenizer as T (Keyword(Entity))
 import Parser.ObjectParser
 
 import Logic.Entity
+import Logic.Event
 import Logic.Item
 import Map.Room
 
@@ -14,11 +15,11 @@ import Control.Applicative
 import qualified Data.Map as M
 import Data.Maybe
 
-accept :: M.Map String Room -> M.Map String Item -> String -> String -> String -> Maybe (Item,UseEvent)
-accept rs is dir rName iName = do
+accept :: M.Map String Room -> M.Map String Item -> String -> String -> String -> Maybe String -> Maybe (Item,UseEvent)
+accept rs is dir rName iName resp = do
     r <- rs M.!? rName
     i <- is M.!? iName
-    return (i,UnlockDoor dir i r)
+    return (i,UnlockDoor dir i r resp)
 
 entity :: M.Map String Room -> M.Map String Item -> Parser r [Token] (Maybe Room,EntityKind)
 entity rs is = do
@@ -29,7 +30,11 @@ entity rs is = do
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
     let ue = const GenericUseEvent <$> lookup "useEvent" ps
     (ListProp acs) <- return $ fromMaybe (ListProp []) (lookup "accepts" ps)
-    let accepts = M.fromList $ mapMaybe (\(PairProp (SProp i, PairProp (SProp "unlockDoor", PairProp (SProp dir, SProp r)))) -> accept rs is dir r i) acs 
+    let accepts = M.fromList $ mapMaybe (\case
+            (PairProp (SProp i, PairProp (SProp "unlockDoor", PairProp (SProp dir, SProp r)))) -> accept rs is dir r i Nothing
+            (PairProp (SProp i, PairProp (SProp "unlockDoor", PairProp (PairProp (SProp dir, SProp r),SProp text)))) -> accept rs is dir r i (Just text)
+            _ -> undefined
+            ) acs 
     return (room,EntityKind idt name description True item ue accepts)
 
 entities :: M.Map String Room -> M.Map String Item -> Parser r [Token] [(Maybe Room,EntityKind)]

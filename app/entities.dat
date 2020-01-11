@@ -8,4 +8,4 @@ Entity sdoor
   description: "A door with a silvery lock"
   location: "s"
   useEvent: "placeholder"
-  accepts: [("skey",("unlockDoor",("east","pm")))]
+  accepts: [("skey",("unlockDoor",(("east","pm"),"With a creak, the silvered door opens.")))]

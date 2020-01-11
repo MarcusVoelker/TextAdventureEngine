@@ -1,6 +1,6 @@
 module Logic.Entity where
 
-import Logic.Dialogue
+import Logic.Event
 import Logic.Item
 import Thing
 
@@ -8,16 +8,6 @@ import Map.Room
 
 import Control.Lens
 import qualified Data.Map as M
-
-data UseEvent = UnlockDoor {
-    _useEventDirection :: String,
-    _useEventItem :: Item,
-    _useEventNewRoom :: Room
-} | GenericUseEvent
-
-newtype TalkEvent = TalkEvent {
-    _talkEventDialogueTree :: DialogueTree
-}
 
 data EntityKind = EntityKind {
     _entityKindIdt :: String,
@@ -42,8 +32,6 @@ instance Eq EntityKind where
 instance Eq Entity where
     a == b = a^.idt == b^.idt
 
-makeFields ''UseEvent
-makeFields ''TalkEvent
 makeFields ''EntityKind
 makeFields ''Entity
 

@@ -2,6 +2,7 @@ module Logic.DefaultActions where
 
 import Logic.Dialogue
 import Logic.Entity
+import Logic.Event
 import Logic.GameState
 import Logic.Interaction
 import Logic.Player
@@ -69,6 +70,7 @@ takeItem t = withEntity t $ \e -> case e^.kind.takenItem of
         r <- use (player.location)
         removeEntity r e 
         addToInventory i
+        respondText $ "Picked up " ++ t ++ "."
 
 talkTo :: String -> GameAction ()
 talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse (DialogueTree "Hello there!" $ M.fromList [("bye",Nothing),("hi",Just (DialogueTree "Go away." $ M.singleton "bye" Nothing))])
@@ -115,11 +117,18 @@ addDoor :: Room -> String -> Room -> GameAction ()
 addDoor s n t = dynamicDoors %= M.insertWith (++) s [(n,t)]
 
 runItemEvent :: UseEvent -> Item -> Entity -> GameAction ()
-runItemEvent (UnlockDoor dir key target) item entity 
+runItemEvent (UnlockDoor dir key target resp) item entity 
     | key == item = do
         r <- use (player.location)
         removeEntity r entity
         addDoor r dir target
+        forM_ resp respondText
+        when (dir `elem` ["north","west","south","east"]) $ 
+            respondText $ "There is now an exit to the " ++ dir
+        when (dir `elem` ["up","down"]) $ 
+            respondText $ "There is now an exit " ++ dir
+        unless (dir `elem` ["north","west","south","east","up","down"]) $ 
+            respondText $ "There is now an exit though the " ++ dir
     | otherwise = respondText "This doesn't fit!"
 runItemEvent GenericUseEvent _ _ = respondText "I sure could use that if it was implemented properly"
 
