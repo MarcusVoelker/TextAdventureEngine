@@ -13,7 +13,7 @@ data UseEvent = UnlockDoor {
     _useEventDirection :: String,
     _useEventItem :: Item,
     _useEventNewRoom :: Room
-}
+} | GenericUseEvent
 
 newtype TalkEvent = TalkEvent {
     _talkEventDialogueTree :: DialogueTree
@@ -24,7 +24,8 @@ data EntityKind = EntityKind {
     _entityKindName :: String,
     _entityKindDescription :: String,
     _entityKindVisible :: Bool,
-    _entityKindItem :: Maybe Item,
+    _entityKindTakenItem :: Maybe Item,
+    _entityKindUseEvent :: Maybe UseEvent,
     _entityKindAccepts :: M.Map Item UseEvent
 }
 

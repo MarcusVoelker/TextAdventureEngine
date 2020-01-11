@@ -34,8 +34,8 @@ talkAction = do
     eoi 
     return l 
 
-useAction :: Parser r String (GameAction ())
-useAction = do
+useOnAction :: Parser r String (GameAction ())
+useOnAction = do
     consume "use "
     words <- sepSome (void $ some $ consumeSingle ' ') word
     eoi 
@@ -43,6 +43,13 @@ useAction = do
         (\(n,_:m) -> return $ useOn (unwords n) (unwords m)) $ break (=="on") words
     else
         fail "expected 'on'"
+
+useEntityAction :: Parser r String (GameAction ())
+useEntityAction = do
+    consume "use"
+    l <- useEntity <$> (some (consumeSingle ' ') >> full)
+    eoi 
+    return l 
 
 goSynonym :: Parser r String (GameAction ())
 goSynonym = do
@@ -57,7 +64,8 @@ action :: Parser r String (GameAction ())
 action = lookAction
     <|> takeAction
     <|> talkAction
-    <|> useAction
+    <|> useOnAction
+    <|> useEntityAction
     <|> goSynonym
     <|> (consume "inventory" >> return viewInv << eoi)
     <|> (go <$> (consume "go " >> full << eoi))

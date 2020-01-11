@@ -63,7 +63,7 @@ lookAt :: String -> GameAction ()
 lookAt t = withEntity t $ \e -> respondText $ e^.description
 
 takeItem :: String -> GameAction ()
-takeItem t = withEntity t $ \e -> case e^.kind.item of 
+takeItem t = withEntity t $ \e -> case e^.kind.takenItem of 
     Nothing -> respondText $ "I cannot pick up " ++ t ++ "!"
     Just i -> do 
         r <- use (player.location)
@@ -114,17 +114,28 @@ viewInv = do
 addDoor :: Room -> String -> Room -> GameAction ()
 addDoor s n t = dynamicDoors %= M.insertWith (++) s [(n,t)]
 
-runEvent :: UseEvent -> Item -> Entity -> GameAction ()
-runEvent (UnlockDoor dir key target) item entity 
+runItemEvent :: UseEvent -> Item -> Entity -> GameAction ()
+runItemEvent (UnlockDoor dir key target) item entity 
     | key == item = do
         r <- use (player.location)
         removeEntity r entity
         addDoor r dir target
     | otherwise = respondText "This doesn't fit!"
+runItemEvent GenericUseEvent _ _ = respondText "I sure could use that if it was implemented properly"
+
+runEvent :: UseEvent -> Entity -> GameAction ()
+runEvent GenericUseEvent _ = respondText "I sure could use that if it was implemented properly"
+runEvent _ _ = undefined
 
 useOn :: String -> String -> GameAction ()
 useOn ti te = withEntity te $ \e -> 
     withItem ti $ \i -> 
         case (e^.kind.accepts) M.!? i of
             Nothing -> respondText $ "I see no way to use " ++ ti ++ " on " ++ te ++ "!"
-            Just event -> runEvent event i e
+            Just event -> runItemEvent event i e
+
+useEntity :: String -> GameAction ()
+useEntity te = withEntity te $ \e -> 
+    case e^.kind.useEvent of
+        Nothing -> respondText $ "I see no way to use " ++ te ++ "!"
+        Just event -> runEvent event e
