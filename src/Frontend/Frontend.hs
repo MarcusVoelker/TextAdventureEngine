@@ -35,6 +35,21 @@ openTopWindow x y w h v c = do
 closeContextWindows :: Int -> FrontMod ()
 closeContextWindows c = windows %= M.filter (\w -> w^.context /= c)
 
+openMainMenu :: StateStack -> FrontMod StateStack
+openMainMenu ss = do
+    let ss' = openContext MainMenuState ss
+    openTopWindow 
+        (Absolute 0)
+        (Absolute 0) 
+        (Absolute (-1)) 
+        (Absolute (-1))
+        (\ss _ -> case ss^.stack of 
+            [] -> ["Nobody here but us chickens!"]
+            _ -> ["This is a main menu"]
+            )
+        (contextCount ss + 1)
+    return ss'
+
 executeResponse :: StateStack -> Response -> FrontMod StateStack
 executeResponse ss (TextResponse s) = do
     textHistory %= (++lines s)
@@ -52,6 +67,7 @@ executeResponse ss (InitiateDialogueResponse d) = do
             )
         (contextCount ss + 1)
     return ss'
+executeResponse ss (OpenMenuResponse "main") = openMainMenu ss
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
     return $ closeContext ss
@@ -135,6 +151,7 @@ handleEvent (EventResize (x,y)) ss = do
 handleEvent (EventKey _ Up _ _) ss = return ss
 handleEvent (EventKey (MouseButton _) _ _ _) ss = return ss
 handleEvent (EventMotion _) ss = return ss
+handleEvent (EventKey (SpecialKey KeyEsc) Down _ _) ss = openMainMenu ss
 handleEvent e ss = do
     lift $ putStrLn $ "Unhandled Event " ++ show e
     return ss

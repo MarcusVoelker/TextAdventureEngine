@@ -12,7 +12,7 @@ import qualified Data.Map.Strict as M
 
 data StackedState = DialogueState {
     _stackedStateDialogue :: DialogueTree
-} | MenuState
+} | MainMenuState
 
 data StateStack = StateStack {
     _stateStackBottom :: GameState,
