@@ -28,7 +28,7 @@ entity rs is = do
     (SProp description) <- return $ fromMaybe (SProp "") (lookup "description" ps)
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
-    let ue = const GenericUseEvent <$> lookup "useEvent" ps
+    let ue = GenericUseEvent <$ lookup "useEvent" ps
     (ListProp acs) <- return $ fromMaybe (ListProp []) (lookup "accepts" ps)
     let accepts = M.fromList $ mapMaybe (\case
             (PairProp (SProp i, PairProp (SProp "unlockDoor", PairProp (SProp dir, SProp r)))) -> accept rs is dir r i Nothing
