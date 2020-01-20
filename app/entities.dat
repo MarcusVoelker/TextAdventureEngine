@@ -7,5 +7,5 @@ Entity sdoor
   name: "Silvered Door"
   description: "A door with a silvery lock"
   location: "s"
-  useEvent: "placeholder"
+  useEvent: ("displayText","The door doesn't budge. It seems to be locked.")
   accepts: [("skey",("unlockDoor",(("east","pm"),"With a creak, the silvered door opens.")))]

@@ -131,10 +131,12 @@ runItemEvent (UnlockDoor dir key target resp) item entity
             respondText $ "There is now an exit though the " ++ dir
     | otherwise = respondText "This doesn't fit!"
 runItemEvent GenericUseEvent _ _ = respondText "I sure could use that if it was implemented properly"
+runItemEvent _ _ _ = respondText "Internal Game Error!"
 
 runEvent :: UseEvent -> Entity -> GameAction ()
+runEvent (DisplayText t) _ = respondText t
 runEvent GenericUseEvent _ = respondText "I sure could use that if it was implemented properly"
-runEvent _ _ = undefined
+runEvent _ _ = respondText "Internal Game Error!"
 
 useOn :: String -> String -> GameAction ()
 useOn ti te = withEntity te $ \e -> 
