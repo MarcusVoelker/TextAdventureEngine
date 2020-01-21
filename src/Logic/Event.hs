@@ -12,6 +12,8 @@ data UseEvent = UnlockDoor {
     _useEventItem :: Item,
     _useEventNewRoom :: Room,
     _useEventConfirmation :: Maybe String
+} | DisplayText {
+    _useEventText :: String
 } | GenericUseEvent
 
 newtype TalkEvent = TalkEvent {
