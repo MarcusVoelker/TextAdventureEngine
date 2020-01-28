@@ -17,3 +17,6 @@ Room f
   name: "Start"
   description: "The center of the final room"
   exits: [("west","pm")]
+Room d
+  name: "Pipe"
+  description: "A room with a giant concrete basin in the floor."
