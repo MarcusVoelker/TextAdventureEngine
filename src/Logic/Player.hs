@@ -4,7 +4,7 @@ import Thing
 
 import Logic.Item
 
-import Map.Room
+import GameData.Room
 
 import Control.Lens
 import qualified Data.Map as M

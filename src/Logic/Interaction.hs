@@ -6,7 +6,7 @@ import Logic.Item
 import Logic.Entity
 import Logic.Response
 
-import Map.Room
+import GameData.Room
 
 import Control.Lens.Setter
 import Control.Lens.Getter

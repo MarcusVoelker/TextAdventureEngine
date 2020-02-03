@@ -4,7 +4,7 @@ import Parser.Tokenizer hiding (Keyword(Room))
 import qualified Parser.Tokenizer as T (Keyword(Room))
 import Parser.ObjectParser
 
-import Map.Room
+import GameData.Room
 import Thing
 
 import Text.LParse.Parser

@@ -1,4 +1,4 @@
-module Map.Room where
+module GameData.Room where
 
 import Thing
 

@@ -1,6 +1,6 @@
 import Parser.RoomParser
 import Parser.Tokenizer
-import Map.Room
+import GameData.Room
 import Actions.DefaultActions
 import Actions.GameState
 import Actions.Interaction

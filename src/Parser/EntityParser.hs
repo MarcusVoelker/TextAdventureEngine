@@ -7,7 +7,7 @@ import Parser.ObjectParser
 import Logic.Entity
 import Logic.Event
 import Logic.Item
-import Map.Room
+import GameData.Room
 
 import Text.LParse.Parser
 

@@ -9,7 +9,7 @@ import Logic.Player
 import Logic.Item
 import Logic.Response
 
-import Map.Room
+import GameData.Room
 import Thing
 
 import Control.Lens

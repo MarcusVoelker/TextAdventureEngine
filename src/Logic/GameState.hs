@@ -4,7 +4,7 @@ import Control.Lens
 
 import Logic.Entity
 import Logic.Player
-import Map.Room
+import GameData.Room
 
 import qualified Data.Map as M
 

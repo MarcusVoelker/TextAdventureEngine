@@ -3,7 +3,7 @@ module Logic.Event where
 import Logic.Dialogue
 import Logic.Item
 
-import Map.Room
+import GameData.Room
 
 import Control.Lens
 
