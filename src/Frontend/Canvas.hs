@@ -1,9 +1,13 @@
 module Frontend.Canvas where
 
+import GameData.Text
+
 import Control.Lens
 import qualified Data.Map.Strict as M
 
-data CellContent = BlankCell | CharCell Char | CursorCell deriving (Show,Eq)
+data CellEffect = Coloured Int Int Int | Shake deriving (Show,Eq)
+
+data CellContent = BlankCell | CharCell Char | EffectCell CellEffect CellContent | CursorCell deriving (Show,Eq)
 
 data CanvasCell = CanvasCell {
     _canvasCellContent :: CellContent,
@@ -20,3 +24,10 @@ makeFields ''CanvasState
 
 initialCanvasState :: CanvasState
 initialCanvasState = CanvasState M.empty
+
+cellizeLexeme :: ResolvedLexeme -> [CellContent]
+cellizeLexeme (Text s) = map CharCell s
+cellizeLexeme (RenderText "shake" rt) = map (EffectCell Shake) $ cellize rt
+
+cellize :: ResolvedText -> [CellContent]
+cellize = concatMap cellizeLexeme

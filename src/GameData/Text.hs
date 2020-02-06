@@ -24,3 +24,6 @@ resolveLexeme :: M.Map String Int -> VariadicLexeme -> ResolvedText
 resolveLexeme _ (RawText s) = [Text s]
 resolveLexeme m (VRenderText r v) = [RenderText r (resolveText m v)]
 resolveLexeme m (ConditionalText c t) = if evaluateCondition m c then resolveText m t else []
+
+liftString :: String -> ResolvedText
+liftString = return . Text

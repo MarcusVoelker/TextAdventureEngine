@@ -49,7 +49,7 @@ dialogueAction :: String -> TempAction ()
 dialogueAction s = do 
     d <- get
     case (d^.dialogue.nexts) M.!? s of
-        Nothing -> respondText "Huh?"
+        Nothing -> respondString "Huh?"
         Just Nothing -> respond LeaveContextResponse
         Just (Just d') -> put (DialogueState d')
 

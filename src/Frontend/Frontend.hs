@@ -7,6 +7,8 @@ import Frontend.State
 import Frontend.FrontState
 import Frontend.Window
 
+import GameData.Text
+
 import Logic.Dialogue
 import Logic.Driver
 import Logic.Response
@@ -44,15 +46,15 @@ openMainMenu ss = do
         (Absolute (-1)) 
         (Absolute (-1))
         (\ss _ -> case ss^.stack of 
-            [] -> ["Nobody here but us chickens!"]
-            _ -> ["This is a main menu"]
+            [] -> [liftString "Nobody here but us chickens!"]
+            _ -> [liftString "This is a main menu"]
             )
         (contextCount ss + 1)
     return ss'
 
 executeResponse :: StateStack -> Response -> FrontMod StateStack
 executeResponse ss (TextResponse s) = do
-    textHistory %= (++lines s)
+    textHistory %= (++[s])
     return ss
 executeResponse ss (InitiateDialogueResponse d) = do
     let ss' = openContext (DialogueState d) ss
@@ -62,8 +64,8 @@ executeResponse ss (InitiateDialogueResponse d) = do
         (Absolute (-4)) 
         (Absolute (-8))
         (\ss _ -> case ss^.stack of 
-            [] -> ["Nobody here but us chickens!"]
-            (x:_) -> [x^.dialogue.response]
+            [] -> [liftString "Nobody here but us chickens!"]
+            (x:_) -> [liftString $ x^.dialogue.response]
             )
         (contextCount ss + 1)
     return ss'
@@ -86,7 +88,7 @@ initialFrontendState (w,h) (fw,fh) = FrontendState
     initialInputState
     initialCanvasState
     (M.fromList [
-        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> ["> " ++ (fs^.input.buffer)]) 0 doubleStyle),
+        (0,Window 0 (Absolute 0) (Absolute (-3)) (Absolute (-1)) (Absolute (-1)) (\_ fs -> [liftString $ "> " ++ (fs^.input.buffer)]) 0 doubleStyle),
         (1,Window 1 (Absolute 0) (Absolute 0) (Absolute (-1)) (Absolute (-4)) (\_ fs -> 
             let (_,ch) = fs^.settings.dimensions
                 th     = fs^.textHistory 

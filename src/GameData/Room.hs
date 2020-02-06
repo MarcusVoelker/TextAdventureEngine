@@ -2,13 +2,15 @@ module GameData.Room where
 
 import Thing
 
+import GameData.Text
+
 import Control.Lens
 import qualified Data.Map as M
 
 data Room = Room {
     _roomIdt :: String,
     _roomName :: String,
-    _roomDescription :: String,
+    _roomDescription :: VariadicText,
     _roomExits :: M.Map String Room
 }
 
