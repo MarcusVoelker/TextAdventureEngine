@@ -52,4 +52,4 @@ respondText :: ResolvedText -> StateT s Responding ()
 respondText = respond . TextResponse 
 
 respondString :: String -> StateT s Responding ()
-respondString = respondText . liftString
+respondString = mapM_ (respondText . liftString) . lines

@@ -54,5 +54,5 @@ renderWindow ss win = do
     sequence_ $ concat $ zipWith (\py -> zipWith (\px -> writeToCanvas (px,py)) [x+1..x'-1]) [y+1..y'-1] $ map cellize $ v ss fs
     when (hnd == 0) $ do
         let cy = length (v ss fs)
-        let cx = length (last (v ss fs))
+        let cx = length (cellize $ last (v ss fs))
         writeToCanvas (x+cx+1,y+cy) CursorCell
