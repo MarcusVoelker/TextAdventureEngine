@@ -1,6 +1,7 @@
 module Frontend.Canvas where
 
-import GameData.Text
+import GameData.Text hiding (RenderDirection(Shake))
+import qualified GameData.Text as T (RenderDirection(Shake))
 
 import Control.Lens
 import qualified Data.Map.Strict as M
@@ -27,7 +28,8 @@ initialCanvasState = CanvasState M.empty
 
 cellizeLexeme :: ResolvedLexeme -> [CellContent]
 cellizeLexeme (Text s) = map CharCell s
-cellizeLexeme (RenderText "shake" rt) = map (EffectCell Shake) $ cellize rt
+cellizeLexeme (RenderText T.Shake rt) = map (EffectCell Shake) $ cellize rt
+cellizeLexeme (RenderText (Color a b c) rt) = map (EffectCell (Coloured a b c)) $ cellize rt
 
 cellize :: ResolvedText -> [CellContent]
 cellize = concatMap cellizeLexeme

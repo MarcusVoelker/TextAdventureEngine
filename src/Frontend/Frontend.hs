@@ -7,7 +7,7 @@ import Frontend.State
 import Frontend.FrontState
 import Frontend.Window
 
-import GameData.Text
+import GameData.Text hiding (Color)
 
 import Logic.Dialogue
 import Logic.Driver

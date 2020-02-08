@@ -29,10 +29,19 @@ conditionalText = do
 rawText :: Parser r String VariadicLexeme
 rawText = RawText <$> some (nParse (`notElem` "\\{}") tokenReturn "Not Raw")
 
+renderDirection :: Parser r String RenderDirection
+renderDirection = 
+    consumeReturn "shake" Shake
+    <|> (consume "color" >> 
+        (Color <$> 
+            (fromIntegral <$> (consumeSingle ' ' >> integer)) 
+            <*> (fromIntegral <$> (consumeSingle ' ' >> integer)) 
+            <*> (fromIntegral <$> (consumeSingle ' ' >> integer))))
+
 renderText :: Parser r String VariadicLexeme
 renderText = do
     consume "\\render{"
-    r <- word
+    r <- renderDirection
     consume "}{"
     lex <- variadicText
     consume "}"

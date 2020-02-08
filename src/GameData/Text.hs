@@ -5,10 +5,12 @@ import qualified Data.Map as M
 
 data VarCondition = CTrue | CIsTrue String | CNot VarCondition | CEqual String Int
 
-data VariadicLexeme = RawText String | VRenderText String VariadicText | ConditionalText VarCondition VariadicText
+data RenderDirection = Shake | Color Int Int Int
+
+data VariadicLexeme = RawText String | VRenderText RenderDirection VariadicText | ConditionalText VarCondition VariadicText
 type VariadicText = [VariadicLexeme]
 
-data ResolvedLexeme = Text String | RenderText String ResolvedText
+data ResolvedLexeme = Text String | RenderText RenderDirection ResolvedText
 type ResolvedText = [ResolvedLexeme]
 
 evaluateCondition :: M.Map String Int -> VarCondition -> Bool

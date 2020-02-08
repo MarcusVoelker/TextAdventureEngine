@@ -64,7 +64,9 @@ withItem t a = do
         Just i -> a i
 
 lookAt :: String -> GameAction ()
-lookAt t = withEntity t $ \e -> respondString $ e^.description
+lookAt t = withEntity t $ \e -> do
+    vars <- use variables
+    respondText $ resolveText vars $ e^.description
 
 takeItem :: String -> GameAction ()
 takeItem t = withEntity t $ \e -> case e^.kind.takenItem of 

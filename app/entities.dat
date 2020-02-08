@@ -1,6 +1,6 @@
 Entity key
   name: "Silver Key"
-  description: "A silver key with scuff marks all over its length"
+  description: "A \render{color 228 232 240}{silver} key with scuff marks all over its length"
   location: "s"
   item: "skey"
 Entity sdoor
