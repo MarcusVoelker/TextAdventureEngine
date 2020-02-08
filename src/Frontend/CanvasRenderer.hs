@@ -17,7 +17,10 @@ renderContent BlankCell = return Blank
 renderContent (CharCell c) = return (renderChar c)
 renderContent CursorCell = do
   et <- view elapsedTime
-  return $ if mod (floor (et*0.7)) 2 == 1 then rect (0,0) (7,15) else Blank
+  return $ if mod (floor et) 2 == 1 then rect (0,0) (7,15) else Blank
+renderContent (EffectCell Shake c) = do
+    et <- view elapsedTime
+    Translate 0 (fromIntegral (mod (floor (et*30)) 5)-2) <$> renderContent c
 
 renderCell :: (Int,Int) -> CanvasCell -> FrontRead Picture
 renderCell (x,y) cell = do

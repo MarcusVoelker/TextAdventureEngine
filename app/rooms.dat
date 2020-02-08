@@ -1,6 +1,6 @@
 Room s
   name: "Start"
-  description: "The first room"
+  description: "The first room, which is \render{shake}{shaking}"
 Room pm
   name: "Start"
   description: "The middle part of the preroom"

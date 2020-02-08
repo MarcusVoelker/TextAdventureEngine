@@ -6,6 +6,7 @@ import Text.LParse.Parser
 import Text.LParse.Prebuilt
 
 import Control.Applicative
+import Data.List
 
 true :: Parser r String VarCondition
 true = consume "true" >> return CTrue
@@ -26,7 +27,16 @@ conditionalText = do
     return $ ConditionalText c lex
 
 rawText :: Parser r String VariadicLexeme
-rawText = RawText <$> some (nParse (/= '\\') tokenReturn "Not Raw")
+rawText = RawText <$> some (nParse (`notElem` "\\{}") tokenReturn "Not Raw")
+
+renderText :: Parser r String VariadicLexeme
+renderText = do
+    consume "\\render{"
+    r <- word
+    consume "}{"
+    lex <- variadicText
+    consume "}"
+    return $ VRenderText r lex
 
 variadicText :: Parser t String VariadicText
-variadicText = many (conditionalText <|> rawText)
+variadicText = many (conditionalText <|> renderText <|> rawText)
