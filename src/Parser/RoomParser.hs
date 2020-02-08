@@ -20,7 +20,7 @@ room :: M.Map String Room -> Parser r [Token] Room
 room rs = do
     (Object T.Room idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
-    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> variadicText
+    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> metaText
     (ListProp exits) <- return $ fromMaybe (ListProp []) (lookup "exits" ps)
     let exs = mapMaybe (\(PairProp (SProp d,SProp n)) -> (d,) <$> M.lookup n rs) exits
     return $ Room 

@@ -21,9 +21,7 @@ renderContent CursorCell = do
 renderContent (EffectCell Shake c) = do
     et <- view elapsedTime
     Translate 0 (fromIntegral (mod (floor (et*30)) 5)-2) <$> renderContent c
-renderContent (EffectCell (Coloured r g b) c) = do
-    et <- view elapsedTime
-    Color (makeColor (fromIntegral r/255) (fromIntegral g/255) (fromIntegral b/255) 1) <$> renderContent c
+renderContent (EffectCell (Coloured r g b) c) = Color (makeColor (fromIntegral r/255) (fromIntegral g/255) (fromIntegral b/255) 1) <$> renderContent c
 
 renderCell :: (Int,Int) -> CanvasCell -> FrontRead Picture
 renderCell (x,y) cell = do

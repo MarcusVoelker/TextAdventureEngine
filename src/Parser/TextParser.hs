@@ -1,4 +1,4 @@
-module Parser.TextParser (variadicText) where
+module Parser.TextParser (metaText) where
 
 import GameData.Text
 
@@ -17,16 +17,16 @@ isTrue = consume "isTrue " >> (CIsTrue <$> word)
 condition :: Parser r String VarCondition
 condition = true <|> isTrue
 
-conditionalText :: Parser r String VariadicLexeme
+conditionalText :: Parser r String MetaLexeme
 conditionalText = do
     consume "\\if{"
     c <- condition
     consume "}{"
-    lex <- variadicText
+    lex <- metaText
     consume "}"
     return $ ConditionalText c lex
 
-rawText :: Parser r String VariadicLexeme
+rawText :: Parser r String MetaLexeme
 rawText = RawText <$> some (nParse (`notElem` "\\{}") tokenReturn "Not Raw")
 
 renderDirection :: Parser r String RenderDirection
@@ -38,14 +38,14 @@ renderDirection =
             <*> (fromIntegral <$> (consumeSingle ' ' >> integer)) 
             <*> (fromIntegral <$> (consumeSingle ' ' >> integer))))
 
-renderText :: Parser r String VariadicLexeme
+renderText :: Parser r String MetaLexeme
 renderText = do
     consume "\\render{"
     r <- renderDirection
     consume "}{"
-    lex <- variadicText
+    lex <- metaText
     consume "}"
-    return $ VRenderText r lex
+    return $ MRenderText r lex
 
-variadicText :: Parser t String VariadicText
-variadicText = many (conditionalText <|> renderText <|> rawText)
+metaText :: Parser t String MetaText
+metaText = many (conditionalText <|> renderText <|> rawText)

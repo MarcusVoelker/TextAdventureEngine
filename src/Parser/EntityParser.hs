@@ -27,7 +27,7 @@ entity :: M.Map String Room -> M.Map String Item -> Parser r [Token] (Maybe Room
 entity rs is = do
     (Object T.Entity idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
-    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> variadicText
+    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> metaText
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
     let ue = (\case 

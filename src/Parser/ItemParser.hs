@@ -20,7 +20,7 @@ item :: Parser r [Token] Item
 item = do
     (Object T.Item idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
-    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> variadicText
+    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> metaText
     let stack = isJust (lookup "stackable" ps)
     return $ Item idt name vt stack
 

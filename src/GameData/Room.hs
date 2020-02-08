@@ -10,7 +10,7 @@ import qualified Data.Map as M
 data Room = Room {
     _roomIdt :: String,
     _roomName :: String,
-    _roomDescription :: VariadicText,
+    _roomDescription :: MetaText,
     _roomExits :: M.Map String Room
 }
 

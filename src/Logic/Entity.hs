@@ -13,7 +13,7 @@ import qualified Data.Map as M
 data EntityKind = EntityKind {
     _entityKindIdt :: String,
     _entityKindName :: String,
-    _entityKindDescription :: VariadicText,
+    _entityKindDescription :: MetaText,
     _entityKindVisible :: Bool,
     _entityKindTakenItem :: Maybe Item,
     _entityKindUseEvent :: Maybe UseEvent,
@@ -39,11 +39,11 @@ makeFields ''Entity
 instance HasName Entity String where
     name = _entityNameLens
 
-instance HasDescription Entity VariadicText where
+instance HasDescription Entity MetaText where
     description = _entityDescriptionLens
     
 _entityNameLens :: Lens' Entity String
 _entityNameLens = kind.name
     
-_entityDescriptionLens :: Lens' Entity VariadicText
+_entityDescriptionLens :: Lens' Entity MetaText
 _entityDescriptionLens = kind.description

@@ -9,7 +9,7 @@ import Control.Lens
 data Item = Item {
     _itemIdt :: String,
     _itemName :: String,
-    _itemDescription :: VariadicText,
+    _itemDescription :: MetaText,
     _itemStackable :: Bool
 }
 
