@@ -2,9 +2,13 @@ module Logic.GameState where
 
 import Control.Lens
 
+import Logic.Deserialiser
 import Logic.Entity
 import Logic.Player
 import Map.Room
+
+import Serialiser
+import Thing
 
 import qualified Data.Map as M
 
@@ -18,6 +22,23 @@ data GameState = GameState {
 }
 
 makeFields ''GameState
+
+instance Serialisable GameState where
+    serialise gs = serialise (gs^.player)
+        <> serialise (gs^.variables)
+        <> serialise (gs^.entities)
+        <> serialise (gs^.nextIdt)
+        <> serialise (gs^.dynamicDoors)
+        <> serialise (gs^.dynamicDescription)
+
+instance Persistent GameState DeserialisationContext where
+    deserialise = GameState <$>
+        deserialise <*>
+        deserialise <*>
+        deserialise <*>
+        deserialise <*>
+        deserialise <*>
+        deserialise
 
 initialState :: Room -> M.Map String Int -> GameState
 initialState r vs = 

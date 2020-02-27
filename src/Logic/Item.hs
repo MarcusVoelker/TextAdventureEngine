@@ -1,5 +1,6 @@
 module Logic.Item where
 
+import Serialiser
 import Thing
 
 import Control.Lens
@@ -12,3 +13,6 @@ data Item = Item {
 } deriving (Eq,Ord)
 
 makeFields ''Item
+
+instance Serialisable Item where
+    serialise i = serialise (i^.idt)

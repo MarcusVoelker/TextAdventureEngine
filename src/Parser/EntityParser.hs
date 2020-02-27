@@ -5,6 +5,7 @@ import qualified Parser.Tokenizer as T (Keyword(Entity))
 import Parser.ObjectParser
 
 import Logic.Entity
+import Logic.EntityKind
 import Logic.Event
 import Logic.Item
 import Map.Room

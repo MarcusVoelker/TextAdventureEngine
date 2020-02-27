@@ -2,6 +2,7 @@ module Logic.DefaultActions where
 
 import Logic.Dialogue
 import Logic.Entity
+import Logic.EntityKind
 import Logic.Event
 import Logic.GameState
 import Logic.Interaction
