@@ -1,10 +1,18 @@
-Entity key
+Entity skey
   name: "Silver Key"
+  displayName: "\render{color 228 232 240}{Silver} Key"
   description: "A \render{color 228 232 240}{silver} key with scuff marks all over its length"
   location: "s"
   item: "skey"
+Entity gkey
+  name: "Golden Key"
+  displayName: "\render{color 255 204 0}{Golden} Key"
+  description: "A \render{color 255 204 0}{golden} key. It seems pristine."
+  location: "s"
+  item: "gkey"
 Entity sdoor
   name: "Silvered Door"
+  displayName: "\render{color 228 232 240}{Silvered} Door"
   description: "A door with a silvery lock"
   location: "s"
   useEvent: ("displayText","The door doesn't budge. It seems to be locked.")

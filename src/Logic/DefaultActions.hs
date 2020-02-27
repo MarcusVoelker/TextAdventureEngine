@@ -29,6 +29,7 @@ roomDescription r = do
 look :: GameAction ()
 look = do
     r <- use (player.location) 
+    vars <- use variables
     roomDescription r >>= respondText
     es <- M.findWithDefault [] r <$> use entities 
     dyns <- use dynamicDoors
@@ -36,7 +37,7 @@ look = do
     unless (null exs) $ if length exs == 1 then respondString ("\nThere is an exit to the " ++ unwords exs) else respondString ("\nThere are exits to the " ++ intercalate ", " (init exs) ++ " and " ++ last exs)
     unless (null es) $ do
         respondString "\nYou see here:"
-        forM_ es $ \e -> respondString $ "    " ++ (e^.name)
+        forM_ es $ \e -> respondText $ Text "    " : resolveText vars (e^.displayName)
 
 findEntity :: String -> GameAction (Maybe Entity)
 findEntity t = do
@@ -108,14 +109,15 @@ go e = do
 viewInv :: GameAction ()
 viewInv = do
     inv <- use (player.inventory)
+    vars <- use variables
     if M.null inv then
         respondString "I am carrying nothing."
     else
-        responds $ flip M.foldMapWithKey inv $ \k v -> [(TextResponse . liftString) $ "    " ++ (k^.name) ++
+        responds $ flip M.foldMapWithKey inv $ \k v -> [TextResponse $ Text "    " : resolveText vars(k^.displayName) ++ [Text (
             if k^.stackable then 
                 ": " ++ show v
             else
-                ""
+                "")]
             ]
 
 addDoor :: Room -> String -> Room -> GameAction ()

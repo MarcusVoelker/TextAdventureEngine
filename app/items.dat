@@ -1,3 +1,6 @@
 Item skey
     name: "Silver Key"
     description: "A silver key with scuff marks all over its length"
+Item gkey
+    name: "Golden Key"
+    description: "A golden key. It seems pristine."
