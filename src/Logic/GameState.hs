@@ -9,7 +9,7 @@ import Map.Room
 import qualified Data.Map as M
 
 data GameState = GameState {
-    _gameStatePlayer :: Player GameState,
+    _gameStatePlayer :: Player,
     _gameStateVariables :: M.Map String Int,
     _gameStateEntities :: M.Map Room [Entity],
     _gameStateNextIdt :: Int,
