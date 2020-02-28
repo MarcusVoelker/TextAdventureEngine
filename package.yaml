@@ -25,6 +25,7 @@ dependencies:
 - LParse >= 0.3.1
 - proteaaudio
 - bytestring
+- utf8-string
 - filepath
 - lens
 - gloss

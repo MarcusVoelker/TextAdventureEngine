@@ -1,5 +1,6 @@
 module Map.Room where
 
+import Serialiser
 import Thing
 
 import Control.Lens
@@ -13,6 +14,9 @@ data Room = Room {
 }
 
 makeFields ''Room
+
+instance Serialisable Room where
+    serialise r = serialise (r^.idt)
 
 instance Eq Room where
     a == b = a^.idt == b^.idt

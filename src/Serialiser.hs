@@ -3,6 +3,7 @@ module Serialiser where
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as B 
 import Data.ByteString.Builder
+import qualified Data.ByteString.Lazy.UTF8 as U
 
 import Control.Monad
 import Control.Monad.Trans.State.Strict
@@ -35,6 +36,19 @@ instance Persistent Int ctx where
     deserialise = do
         ws <- sequence (((fromIntegral :: Word8 -> Word64) <$> extractWord) <$ [1..8])
         return $ fromIntegral $ (fromIntegral :: Word64 -> Int64) $ foldr (\w r -> shiftL r 8 .|. w) 0 ws 
+
+instance Serialisable Char where
+    serialise = charUtf8
+
+instance Persistent Char ctx where
+    deserialise = do
+        bs <- get
+        case U.uncons bs of
+            Just (c,r) -> do
+                put r
+                return c
+            Nothing -> fail "Failure"
+
 
 instance (Serialisable a, Serialisable b) => Serialisable (a,b) where
     serialise (a,b) = serialise a <> serialise b

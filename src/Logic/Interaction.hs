@@ -4,6 +4,7 @@ import Logic.GameState
 import Logic.Player
 import Logic.Item
 import Logic.Entity
+import Logic.EntityKind
 import Logic.Response
 
 import Map.Room

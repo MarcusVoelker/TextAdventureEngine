@@ -1,7 +1,9 @@
 module Logic.Player where
 
+import Serialiser
 import Thing
 
+import Logic.Deserialiser
 import Logic.Item
 
 import Map.Room
@@ -16,3 +18,8 @@ data Player = Player {
 
 makeFields ''Player
 
+instance Serialisable Player where
+    serialise p = serialise (p^.location) <> serialise (p^.inventory)
+
+instance Persistent Player DeserialisationContext where
+    deserialise = Player <$> deserialise <*> deserialise
