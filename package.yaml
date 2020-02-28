@@ -55,6 +55,7 @@ tests:
   TextAdventureEngine-test:
     main:                Spec.hs
     source-dirs:         test
+    default-extensions: ExistentialQuantification
     ghc-options:
     - -threaded
     - -rtsopts
