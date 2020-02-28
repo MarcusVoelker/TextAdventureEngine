@@ -75,3 +75,11 @@ instance (Ord k, Persistent k ctx, Persistent a ctx) => Persistent (M.Map k a) c
             val <- deserialise
             return (key,val)
         return $ M.fromList l
+
+saveObject :: (Serialisable a) => String -> a -> IO ()
+saveObject path o = B.writeFile path (toLazyByteString $ serialise o)
+
+loadObject :: (Persistent a ctx) => String -> ctx -> IO a
+loadObject path ctx = do
+    bs <- B.readFile path
+    return $ runReader (evalStateT deserialise bs) ctx
