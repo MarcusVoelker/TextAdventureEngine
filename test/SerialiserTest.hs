@@ -20,11 +20,11 @@ testStability (MkTestable a) = a == runReader (evalStateT deserialise (toLazyByt
 
 tests :: [Testable]
 tests = [pack (1 :: Int)
---    , pack 'c'
---    , pack "Party"
---    , pack (3 :: Int,"this is a test")
-    , pack [3 :: Int, 4 :: Int, 5 :: Int]]
---    , pack (M.fromList [("a",1 :: Int),("b", 2 :: Int)])]
+    , pack 'c'
+    , pack "Party"
+    , pack (3 :: Int,"this is a test")
+    , pack [3 :: Int, 4 :: Int, 5 :: Int]
+    , pack (M.fromList [("a",1 :: Int),("b", 2 :: Int)])]
 
 run :: IO ()
 run = do
