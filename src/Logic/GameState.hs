@@ -8,7 +8,6 @@ import Logic.Player
 import Map.Room
 
 import Serialiser
-import Thing
 
 import qualified Data.Map as M
 

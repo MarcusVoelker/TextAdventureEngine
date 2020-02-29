@@ -12,7 +12,7 @@ data Response = TextResponse {
         _responseMenuName :: String
     } | InitiateDialogueResponse {
         _responseDialogueTree :: DialogueTree
-    } | LeaveContextResponse | QuitResponse
+    } | LeaveContextResponse | SaveResponse | LoadResponse | QuitResponse
 
 makeFields ''Response
 

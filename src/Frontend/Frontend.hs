@@ -9,8 +9,12 @@ import Frontend.Window
 
 import Logic.Dialogue
 import Logic.Driver
+import Logic.Deserialiser
 import Logic.Response
+import Logic.GameState
 import Logic.StateStack
+
+import Serialiser
 
 import Control.Exception
 import Control.Lens
@@ -71,6 +75,10 @@ executeResponse ss (OpenMenuResponse "main") = openMainMenu ss
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
     return $ closeContext ss
+executeResponse ss SaveResponse = lift (saveObject "save.dat" (ss^.bottom)) >> return ss
+executeResponse _ LoadResponse = do
+    dc <- use deserialisationContext
+    (\gs -> StateStack gs []) <$> lift (loadObject "save.dat" dc)
 executeResponse _ QuitResponse = lift exitSuccess
 executeResponse _ _ = lift $ throwIO $ PatternMatchFail "Unhandled Response!"
 
@@ -80,7 +88,7 @@ executeResponses (Responding responses ss) = foldM executeResponse ss responses
 initialInputState :: InputState 
 initialInputState = InputState [] [] 0 Nothing
 
-initialFrontendState :: (Int,Int) -> (Int,Int) -> FrontendState
+initialFrontendState :: (Int,Int) -> (Int,Int) -> DeserialisationContext -> FrontendState
 initialFrontendState (w,h) (fw,fh) = FrontendState 
     [] 
     initialInputState

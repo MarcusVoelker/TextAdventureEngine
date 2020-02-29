@@ -151,3 +151,9 @@ useEntity te = withEntity te $ \e ->
     case e^.kind.useEvent of
         Nothing -> respondText $ "I see no way to use " ++ te ++ "!"
         Just event -> runEvent event e
+
+save :: GameAction ()
+save = respond SaveResponse
+
+load :: GameAction ()
+load = respond LoadResponse

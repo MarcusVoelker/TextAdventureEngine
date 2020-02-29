@@ -3,6 +3,7 @@ module Frontend.State where
 import Frontend.Canvas
 
 import Logic.StateStack
+import Logic.Deserialiser
 
 import Control.Lens
 import qualified Data.Map.Strict as M
@@ -52,7 +53,8 @@ data FrontendState = FrontendState {
     _frontendStateCanvas :: CanvasState,
     _frontendStateWindows :: M.Map WHandle Window,
     _frontendStateSettings :: FrontendSettings,
-    _frontendStateElapsedTime :: Float
+    _frontendStateElapsedTime :: Float,
+    _frontendStateDeserialisationContext :: DeserialisationContext
 }
 
 makeFields ''InputState
