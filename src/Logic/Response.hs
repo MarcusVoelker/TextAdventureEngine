@@ -2,12 +2,14 @@ module Logic.Response where
 
 import Logic.Dialogue
 
+import GameData.Text
+
 import Control.Lens
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 
 data Response = TextResponse {
-        _responseText :: String
+        _responseText :: ResolvedText
     } | InventoryResponse | OpenMenuResponse {
         _responseMenuName :: String
     } | InitiateDialogueResponse {
@@ -46,5 +48,8 @@ respond r = responds [r]
 responds :: [Response] -> StateT s Responding ()
 responds rs = lift $ Responding rs ()
 
-respondText :: String -> StateT s Responding ()
+respondText :: ResolvedText -> StateT s Responding ()
 respondText = respond . TextResponse 
+
+respondString :: String -> StateT s Responding ()
+respondString = mapM_ (respondText . liftString) . lines

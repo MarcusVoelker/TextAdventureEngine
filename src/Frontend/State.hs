@@ -4,13 +4,14 @@ import Frontend.Canvas
 
 import Logic.StateStack
 import Logic.Deserialiser
+import GameData.Text
 
 import Control.Lens
 import qualified Data.Map.Strict as M
 
 type WHandle = Int
 
-type ContentView = StateStack -> FrontendState -> [String]
+type ContentView = StateStack -> FrontendState -> [ResolvedText]
 
 data ScreenLoc = Absolute Int | Relative Float
 data LocKind = X | Y
@@ -48,7 +49,7 @@ data InputState = InputState {
 }
 
 data FrontendState = FrontendState {
-    _frontendStateTextHistory :: [String],
+    _frontendStateTextHistory :: [ResolvedText],
     _frontendStateInput :: InputState,
     _frontendStateCanvas :: CanvasState,
     _frontendStateWindows :: M.Map WHandle Window,

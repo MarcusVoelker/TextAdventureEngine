@@ -6,7 +6,7 @@ import qualified Data.Map as M
 
 import Serialiser
 
-import Map.Room
+import GameData.Room
 import Logic.EntityKind
 import Logic.Item
 

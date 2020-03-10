@@ -7,13 +7,15 @@ import qualified Data.Map as M
 import Serialiser
 import Thing
 
+import GameData.Text
+
 import Logic.Event
 import Logic.Item
 
 data EntityKind = EntityKind {
     _entityKindIdt :: String,
     _entityKindName :: String,
-    _entityKindDescription :: String,
+    _entityKindDescription :: MetaText,
     _entityKindVisible :: Bool,
     _entityKindTakenItem :: Maybe Item,
     _entityKindUseEvent :: Maybe UseEvent,

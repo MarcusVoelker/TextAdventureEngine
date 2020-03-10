@@ -3,16 +3,18 @@ module Parser.EntityParser where
 import Parser.Tokenizer hiding (Keyword(Entity))
 import qualified Parser.Tokenizer as T (Keyword(Entity))
 import Parser.ObjectParser
+import Parser.TextParser
 
 import Logic.Entity
 import Logic.EntityKind
 import Logic.Event
 import Logic.Item
-import Map.Room
+import GameData.Room
 
 import Text.LParse.Parser
 
 import Control.Applicative
+import Control.Arrow
 import qualified Data.Map as M
 import Data.Maybe
 
@@ -26,7 +28,7 @@ entity :: M.Map String Room -> M.Map String Item -> Parser r [Token] (Maybe Room
 entity rs is = do
     (Object T.Entity idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
-    (SProp description) <- return $ fromMaybe (SProp "") (lookup "description" ps)
+    vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> metaText
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
     let ue = (\case 
@@ -39,7 +41,7 @@ entity rs is = do
             (PairProp (SProp i, PairProp (SProp "unlockDoor", PairProp (PairProp (SProp dir, SProp r),SProp text)))) -> accept rs is dir r i (Just text)
             _ -> undefined
             ) acs 
-    return (room,EntityKind idt name description True item ue accepts)
+    return (room,EntityKind idt name vt True item ue accepts)
 
 entities :: M.Map String Room -> M.Map String Item -> Parser r [Token] [(Maybe Room,EntityKind)]
 entities rs is = many $ entity rs is

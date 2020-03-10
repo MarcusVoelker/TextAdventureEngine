@@ -6,7 +6,8 @@ import Thing
 import Logic.EntityKind
 import Logic.Deserialiser
 
-import Map.Room
+import GameData.Room
+import GameData.Text
 
 import Control.Lens
 import qualified Data.Map as M
@@ -34,11 +35,12 @@ instance Persistent Entity DeserialisationContext where
 
 instance HasName Entity String where
     name = _entityNameLens
-instance HasDescription Entity String where
-    description = _entityDescriptionLens
 
+instance HasDescription Entity MetaText where
+    description = _entityDescriptionLens
+    
 _entityNameLens :: Lens' Entity String
 _entityNameLens = kind.name
-
-_entityDescriptionLens :: Lens' Entity String
+    
+_entityDescriptionLens :: Lens' Entity MetaText
 _entityDescriptionLens = kind.description

@@ -5,7 +5,8 @@ import Control.Lens
 import Logic.Deserialiser
 import Logic.Entity
 import Logic.Player
-import Map.Room
+import GameData.Room
+import GameData.Text
 
 import Serialiser
 
@@ -17,7 +18,7 @@ data GameState = GameState {
     _gameStateEntities :: M.Map Room [Entity],
     _gameStateNextIdt :: Int,
     _gameStateDynamicDoors :: M.Map Room [(String, Room)],
-    _gameStateDynamicDescription :: M.Map Room String
+    _gameStateDynamicDescription :: M.Map Room MetaText
 }
 
 makeFields ''GameState
