@@ -113,7 +113,20 @@ eventHandler e (ss,fs) = runStateT (do
     ) fs
 
 handleEvent :: Event -> StateStack -> FrontMod StateStack
-handleEvent (EventKey (Char c) Down m _) ss 
+handleEvent e ss | noContext ss = handleMainEvent e ss
+                 | otherwise    = handleMenuEvent e ss
+
+handleMenuEvent :: Event -> StateStack -> FrontMod StateStack
+handleMenuEvent e ss = case head (ss^.stack) of
+    MainMenuState -> do
+        lift $ putStrLn "Unhandled Menu State Event"
+        return ss
+    _ -> do 
+        lift $ putStrLn "Unhandled Menu State"
+        return ss
+
+handleMainEvent :: Event -> StateStack -> FrontMod StateStack
+handleMainEvent (EventKey (Char c) Down m _) ss 
     | ord c == 8 = do
         nn <- uses (input.buffer) (not.null)
         when nn $
@@ -122,12 +135,12 @@ handleEvent (EventKey (Char c) Down m _) ss
     | otherwise = do
         (input.buffer) %= (++[if shift m == Down then toUpper c else c])
         return ss 
-handleEvent (EventKey (SpecialKey KeySpace) Down _ _) ss = do
+handleMainEvent (EventKey (SpecialKey KeySpace) Down _ _) ss = do
     (input.buffer) %= (++[' '])
     return ss
-handleEvent (EventKey (SpecialKey KeyShiftL) Down _ _) ss = return ss
-handleEvent (EventKey (SpecialKey KeyShiftR) Down _ _) ss = return ss
-handleEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
+handleMainEvent (EventKey (SpecialKey KeyShiftL) Down _ _) ss = return ss
+handleMainEvent (EventKey (SpecialKey KeyShiftR) Down _ _) ss = return ss
+handleMainEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
     st <- use (input.search)
     when (isNothing st) $ do
         curCode <- use (input.buffer)
@@ -141,7 +154,7 @@ handleEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
             (input.historyPointer) .= fromJust (elemIndex pCode (reverse prefix))
             (input.buffer) .= pCode
             return ss
-handleEvent (EventKey (SpecialKey KeyEnter) Down _ _) ss = do
+handleMainEvent (EventKey (SpecialKey KeyEnter) Down _ _) ss = do
     code <- use (input.buffer)
     (input.history) %= (++[code])
     ihLen <- uses (input.history) length
@@ -149,18 +162,18 @@ handleEvent (EventKey (SpecialKey KeyEnter) Down _ _) ss = do
     (input.buffer) .= ""
     (input.search) .= Nothing
     executeResponses $ executeCommand code ss
-handleEvent (EventResize (x,y)) ss = do
+handleMainEvent (EventResize (x,y)) ss = do
     (fx,fy) <- use $ settings.fontDimensions
     let nx = div x fx
     let ny = div y fy
     (settings.dimensions) .= (nx,ny)
     clearCanvas
     return ss
-handleEvent (EventKey _ Up _ _) ss = return ss
-handleEvent (EventKey (MouseButton _) _ _ _) ss = return ss
-handleEvent (EventMotion _) ss = return ss
-handleEvent (EventKey (SpecialKey KeyEsc) Down _ _) ss = openMainMenu ss
-handleEvent e ss = do
+handleMainEvent (EventKey _ Up _ _) ss = return ss
+handleMainEvent (EventKey (MouseButton _) _ _ _) ss = return ss
+handleMainEvent (EventMotion _) ss = return ss
+handleMainEvent (EventKey (SpecialKey KeyEsc) Down _ _) ss = openMainMenu ss
+handleMainEvent e ss = do
     lift $ putStrLn $ "Unhandled Event " ++ show e
     return ss
 
