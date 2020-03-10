@@ -23,13 +23,7 @@ renderCell :: (Int,Int) -> CanvasCell -> FrontRead Picture
 renderCell (x,y) cell = do
     (fw,fh) <- views (settings.fontDimensions) (bimap fromIntegral fromIntegral)
     pic <- renderContent (cell^.content)
-    if isNothing (cell^.fadeout) then
-        return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Color green pic
-    else do
-        et <- view elapsedTime
-        let (f,c) = fromJust (cell^.fadeout)
-        fpic <- renderContent c
-        return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Pictures [Color (makeColor 0 1 0 (f-et)) fpic,Color green pic]
+    return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Color green pic
 
 renderCanvas :: FrontRead Picture
 renderCanvas = do
