@@ -13,3 +13,6 @@ class HasIdt s a | s -> a where
 
 class HasLocation s a | s -> a where
     location :: Lens' s a
+
+class HasContent s a | s -> a where
+    content :: Lens' s a

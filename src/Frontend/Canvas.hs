@@ -6,6 +6,8 @@ import qualified GameData.Text as T (RenderDirection(Shake))
 import Control.Lens
 import qualified Data.Map.Strict as M
 
+import Thing
+
 data CellEffect = Coloured Int Int Int | Shake deriving (Show,Eq)
 
 data CellContent = BlankCell | CharCell Char | EffectCell CellEffect CellContent | CursorCell deriving (Show,Eq)

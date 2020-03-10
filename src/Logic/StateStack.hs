@@ -3,6 +3,7 @@ module Logic.StateStack where
 import Logic.Dialogue
 import Logic.GameState
 import Logic.Interaction
+import Logic.Menu
 import Logic.Response
 
 import Control.Lens
@@ -12,7 +13,10 @@ import qualified Data.Map.Strict as M
 
 data StackedState = DialogueState {
     _stackedStateDialogue :: DialogueTree
-} | MainMenuState
+} | MenuState {
+    _stackedStateMenu :: Menu,
+    _stackedStateIndex :: Int
+}
 
 data StateStack = StateStack {
     _stateStackBottom :: GameState,
@@ -22,6 +26,11 @@ data StateStack = StateStack {
 makeFields ''StackedState
 makeFields ''StateStack
 
+stackTop :: Lens' StateStack StackedState
+stackTop = lens
+    (\s -> head (s^.stack))
+    (\s ss -> over stack ((ss:).tail) s)
+
 type Action a = StateT StateStack Responding a
 type TempAction a = StateT StackedState Responding a
 
@@ -29,9 +38,7 @@ liftBottom :: GameAction a -> Action a
 liftBottom = zoom bottom
 
 liftTemporary :: TempAction a -> Action a
-liftTemporary = zoom $ lens
-    (\s -> head (s^.stack))
-    (\s ss -> over stack ((ss:).tail) s)
+liftTemporary = zoom stackTop
 
 noContext :: StateStack -> Bool
 noContext ss = null $ ss^.stack

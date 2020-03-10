@@ -9,14 +9,16 @@ import Frontend.Window
 
 import GameData.Text hiding (Color)
 
+import Logic.Deserialiser
 import Logic.Dialogue
 import Logic.Driver
-import Logic.Deserialiser
-import Logic.Response
 import Logic.GameState
+import Logic.Menu
+import Logic.Response
 import Logic.StateStack
 
 import Serialiser
+import Thing
 
 import Control.Exception
 import Control.Lens
@@ -30,7 +32,7 @@ import qualified Data.Map.Strict as M
 import Data.Maybe
 import System.Exit
 
-import Graphics.Gloss.Interface.IO.Game
+import Graphics.Gloss.Interface.IO.Game hiding (Text)
 
 openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> ContentView -> Int -> FrontMod ()
 openTopWindow x y w h v c = do
@@ -41,9 +43,28 @@ openTopWindow x y w h v c = do
 closeContextWindows :: Int -> FrontMod ()
 closeContextWindows c = windows %= M.filter (\w -> w^.context /= c)
 
+renderMenu :: StackedState -> [ResolvedText]
+renderMenu (MenuState menu idx) = 
+    zip [a == idx|a<-[0..]] (menu^.content) 
+    >>= (\case 
+        (False,c) -> [liftString "",Text " " : resolveText M.empty (c^.name),liftString ""]
+        (True,c) -> let rt = resolveText M.empty (c^.name) in
+            [liftString (bSTLCorner : (bSHLine <$ [1..textLength rt]) ++ [bSTRCorner]),
+            Text [bSVLine] : rt ++ [Text [bSVLine]],
+            liftString (bSBLCorner : (bSHLine <$ [1..textLength rt]) ++ [bSBRCorner])
+            ]
+    )
+
+bSHLine = '─'
+bSVLine = '│'
+bSTRCorner = '┐'
+bSTLCorner = '┌'
+bSBRCorner = '┘'
+bSBLCorner = '└'
+
 openMainMenu :: StateStack -> FrontMod StateStack
 openMainMenu ss = do
-    let ss' = openContext MainMenuState ss
+    let ss' = openContext (MenuState mainMenu 0) ss
     openTopWindow 
         (Absolute 0)
         (Absolute 0) 
@@ -51,7 +72,7 @@ openMainMenu ss = do
         (Absolute (-1))
         (\ss _ -> case ss^.stack of 
             [] -> [liftString "Nobody here but us chickens!"]
-            _ -> [liftString "This is a main menu"]
+            (x:_) -> renderMenu x 
             )
         (contextCount ss + 1)
     return ss'
@@ -119,13 +140,18 @@ handleEvent e ss | noContext ss = handleMainEvent e ss
                  | otherwise    = handleMenuEvent e ss
 
 handleMenuEvent :: Event -> StateStack -> FrontMod StateStack
-handleMenuEvent e ss = case head (ss^.stack) of
-    MainMenuState -> do
-        lift $ putStrLn "Unhandled Menu State Event"
-        return ss
-    _ -> do 
-        lift $ putStrLn "Unhandled Menu State"
-        return ss
+handleMenuEvent (EventKey (SpecialKey KeyUp) Down _ _) ss@(StateStack _ (MenuState menu idx:_)) = do
+    let menuSize = length (menu^.content)
+    return $ ss&stackTop %~ (\(MenuState menu idx) -> MenuState menu (mod (idx + menuSize - 1) menuSize))
+handleMenuEvent (EventKey (SpecialKey KeyDown) Down _ _) ss@(StateStack _ (MenuState menu idx:_)) = do
+    let menuSize = length (menu^.content)
+    return $ ss&stackTop %~ (\(MenuState menu idx) -> MenuState menu (mod (idx + 1) menuSize))
+handleMenuEvent _ ss@(StateStack _ (MenuState _ _:_)) = do
+    lift $ putStrLn "Unhandled Menu State Event"
+    return ss
+handleMenuEvent _ ss = do
+    lift $ putStrLn "Unhandled Menu State"
+    return ss
 
 handleMainEvent :: Event -> StateStack -> FrontMod StateStack
 handleMainEvent (EventKey (Char c) Down m _) ss 

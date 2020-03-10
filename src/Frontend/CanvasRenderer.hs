@@ -12,6 +12,8 @@ import qualified Data.Map.Strict as M
 import Data.Maybe
 import Graphics.Gloss
 
+import Thing
+
 renderContent :: CellContent -> FrontRead Picture
 renderContent BlankCell = return Blank
 renderContent (CharCell c) = return (renderChar c)

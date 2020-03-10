@@ -60,8 +60,8 @@ goSynonym = do
     else
         fail "unknown go synonym"
 
-saveLoadAction :: Parser r String (GameAction())
-saveLoadAction = (consumeReturn "save" save <|> consumeReturn "load" load) << eoi
+saveLoadQuitAction :: Parser r String (GameAction())
+saveLoadQuitAction = (consumeReturn "save" save <|> consumeReturn "load" load <|> consumeReturn "quit" quit) << eoi
 
 action :: Parser r String (GameAction ())
 action = lookAction
@@ -70,6 +70,6 @@ action = lookAction
     <|> useOnAction
     <|> useEntityAction
     <|> goSynonym
-    <|> saveLoadAction
+    <|> saveLoadQuitAction
     <|> (consume "inventory" >> return viewInv << eoi)
     <|> (go <$> (consume "go " >> full << eoi))

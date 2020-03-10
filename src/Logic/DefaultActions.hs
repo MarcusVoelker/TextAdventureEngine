@@ -162,3 +162,6 @@ save = respond SaveResponse
 
 load :: GameAction ()
 load = respond LoadResponse
+
+quit :: GameAction ()
+quit = respond QuitResponse

@@ -70,3 +70,9 @@ resolveLexeme m (ConditionalText c t) = if evaluateCondition m c then resolveTex
 
 liftString :: String -> ResolvedText
 liftString = return . Text
+
+textLength :: ResolvedText -> Int
+textLength = sum . map (\case
+    Text s -> length s
+    RenderText _ rt -> textLength rt
+    )
