@@ -27,13 +27,6 @@ takeAction = do
     eoi 
     return l 
 
-talkAction :: Parser r String (GameAction ())
-talkAction = do
-    consume "talk" 
-    l <- talkTo <$> (some (consumeSingle ' ') >> full)
-    eoi 
-    return l 
-
 useOnAction :: Parser r String (GameAction ())
 useOnAction = do
     consume "use "
@@ -55,7 +48,7 @@ goSynonym :: Parser r String (GameAction ())
 goSynonym = do
     t0 <- tokenReturn
     eoi
-    if t0 `elem` "nsweud" then
+    if t0 `elem` ("nsweud" :: String) then
         return $ go [t0]
     else
         fail "unknown go synonym"
@@ -66,7 +59,6 @@ saveLoadQuitAction = (consumeReturn "save" save <|> consumeReturn "load" load <|
 action :: Parser r String (GameAction ())
 action = lookAction
     <|> takeAction
-    <|> talkAction
     <|> useOnAction
     <|> useEntityAction
     <|> goSynonym

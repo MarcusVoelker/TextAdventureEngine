@@ -27,7 +27,7 @@ conditionalText = do
     return $ ConditionalText c lex
 
 rawText :: Parser r String MetaLexeme
-rawText = RawText <$> some (nParse (`notElem` "\\{}") tokenReturn "Not Raw")
+rawText = RawText <$> some (nParse (`notElem` ("\\{}" :: String)) tokenReturn "Not Raw")
 
 renderDirection :: Parser r String RenderDirection
 renderDirection = 

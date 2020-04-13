@@ -40,7 +40,7 @@ fullParser r e i c v = do
     (d,t,iR) <- fst <$> pFunc (tokenizer >>> blocker >>> config) c
     vs <- fst <$> pFunc (tokenizer >>> blocker >>> Parser.VariableParser.variables) v
     let initial = initialState (fromJust $ M.lookup iR rMap) vs
-    return $ (d,t,,DeserialisationContext rMap (entityMap $ map snd es) iMap) $ (^.result) $ (\gs -> StateStack gs []) <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
+    return $ (d,t,,DeserialisationContext rMap (entityMap $ map snd es) iMap) $ (^.result) $ buildStateStack <$> execStateT (mapM_ (uncurry instantiateEntity) (mapMaybe (\(r,e) -> (,e) <$> r) es)) initial
 
 runGame :: IO ()
 runGame = withEngine soundEngine $ do

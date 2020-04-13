@@ -11,7 +11,7 @@ import qualified Data.Map.Strict as M
 
 type WHandle = Int
 
-type ContentView = StateStack -> FrontendState -> [ResolvedText]
+type ContentView = StackedState -> FrontendState -> [ResolvedText]
 
 data ScreenLoc = Absolute Int | Relative Float
 data LocKind = X | Y

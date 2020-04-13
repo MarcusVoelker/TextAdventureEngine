@@ -5,7 +5,6 @@ import qualified Parser.Tokenizer as T (Keyword(Entity))
 import Parser.ObjectParser
 import Parser.TextParser
 
-import Logic.Entity
 import Logic.EntityKind
 import Logic.Event
 import Logic.Item

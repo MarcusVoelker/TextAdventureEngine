@@ -4,7 +4,7 @@ github:              "MarcusVoelker/TextAdventureEngine"
 license:             BSD3
 author:              "Marcus Völker"
 maintainer:          "marcus.voelker@rwth-aachen.de"
-copyright:           "2019 Marcus Völker"
+copyright:           "2019-2020 Marcus Völker"
 
 extra-source-files:
 - README.md
@@ -32,7 +32,7 @@ dependencies:
 
 library:
   source-dirs: src
-  default-extensions: TupleSections, LambdaCase, TemplateHaskell, MultiParamTypeClasses, TypeSynonymInstances, FunctionalDependencies, FlexibleInstances, AllowAmbiguousTypes
+  default-extensions: TupleSections, LambdaCase, TemplateHaskell, MultiParamTypeClasses, TypeSynonymInstances, FunctionalDependencies, FlexibleInstances, AllowAmbiguousTypes, OverloadedStrings, LiberalTypeSynonyms
   ghc-options:
   - -O2
   - -Wall

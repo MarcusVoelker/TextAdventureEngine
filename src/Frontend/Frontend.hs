@@ -5,14 +5,13 @@ import Frontend.CanvasRenderer
 import Frontend.Primitives
 import Frontend.State
 import Frontend.FrontState
+import Frontend.Text
 import Frontend.Window
 
 import GameData.Text hiding (Color)
 
 import Logic.Deserialiser
-import Logic.Dialogue
 import Logic.Driver
-import Logic.GameState
 import Logic.Menu
 import Logic.Response
 import Logic.StateStack
@@ -43,7 +42,7 @@ openTopWindow x y w h v c = do
 closeContextWindows :: Int -> FrontMod ()
 closeContextWindows c = windows %= M.filter (\w -> w^.context /= c)
 
-renderMenu :: StackedState -> [ResolvedText]
+renderMenu :: MenuState -> [ResolvedText]
 renderMenu (MenuState menu idx) = 
     zip [a == idx|a<-[0..]] (menu^.content) 
     >>= (\case 
@@ -55,59 +54,39 @@ renderMenu (MenuState menu idx) =
             ]
     )
 
-bSHLine = '─'
-bSVLine = '│'
-bSTRCorner = '┐'
-bSTLCorner = '┌'
-bSBRCorner = '┘'
-bSBLCorner = '└'
-
 openMainMenu :: StateStack -> FrontMod StateStack
 openMainMenu ss = do
-    let ss' = openContext (MenuState mainMenu 0) ss
+    let ss' = openMenuContext (MenuState mainMenu 0) ss
     openTopWindow 
         (Absolute 0)
         (Absolute 0) 
         (Absolute (-1)) 
         (Absolute (-1))
-        (\ss _ -> case ss^.stack of 
-            [] -> [liftString "Nobody here but us chickens!"]
-            (x:_) -> renderMenu x 
-            )
-        (contextCount ss + 1)
+        (\st _ -> applyMenuFunction [liftString "Nobody here but us chickens!"] renderMenu st)
+        1
     return ss'
 
 executeResponse :: StateStack -> Response -> FrontMod StateStack
 executeResponse ss (TextResponse s) = do
     textHistory %= (++[s])
     return ss
-executeResponse ss (InitiateDialogueResponse d) = do
-    let ss' = openContext (DialogueState d) ss
-    openTopWindow 
-        (Absolute 2)
-        (Absolute 2) 
-        (Absolute (-4)) 
-        (Absolute (-8))
-        (\ss _ -> case ss^.stack of 
-            [] -> [liftString "Nobody here but us chickens!"]
-            (x:_) -> [liftString $ x^.dialogue.response]
-            )
-        (contextCount ss + 1)
-    return ss'
 executeResponse ss (OpenMenuResponse "main") = openMainMenu ss
 executeResponse ss LeaveContextResponse = do
     closeContextWindows $ contextCount ss
     return $ closeContext ss
-executeResponse ss SaveResponse = lift (saveObject "save.dat" (ss^.bottom)) >> return ss
+executeResponse ss SaveResponse = lift (saveObject "save.dat" (ss^.globalGameState)) >> return ss
 executeResponse _ LoadResponse = do
     dc <- use deserialisationContext
-    (\gs -> StateStack gs []) <$> lift (loadObject "save.dat" dc)
+    buildStateStack <$> lift (loadObject "save.dat" dc)
 executeResponse _ QuitResponse = lift exitSuccess
 executeResponse _ _ = lift $ throwIO $ PatternMatchFail "Unhandled Response!"
 
-executeResponses :: Responding StateStack -> FrontMod StateStack
-executeResponses (Responding responses ss) = foldM executeResponse ss responses
+executeResponses :: RespondingFrontMod StateStack -> FrontMod StateStack
+executeResponses rfm = do
+    (Responding responses ss) <- runRespondingT rfm
+    foldM executeResponse ss responses
 
+    
 initialInputState :: InputState 
 initialInputState = InputState [] [] 0 Nothing
 
@@ -136,39 +115,35 @@ eventHandler e (ss,fs) = runStateT (do
     ) fs
 
 handleEvent :: Event -> StateStack -> FrontMod StateStack
-handleEvent e ss | noContext ss = handleMainEvent e ss
-                 | otherwise    = handleMenuEvent e ss
+handleEvent e ss = executeResponses $ stepStateStack (Stepper (handleMainEvent e) (handleMenuEvent e)) ss
 
-handleMenuEvent :: Event -> StateStack -> FrontMod StateStack
-handleMenuEvent (EventKey (SpecialKey KeyUp) Down _ _) ss@(StateStack _ (MenuState menu idx:_)) = do
+handleMenuEvent :: Event -> MenuStepper RespondingFrontMod
+handleMenuEvent (EventKey (SpecialKey KeyUp) Down _ _) = step1 $ \(MenuState menu idx) -> lift $ do
     let menuSize = length (menu^.content)
-    return $ ss&stackTop %~ (\(MenuState menu idx) -> MenuState menu (mod (idx + menuSize - 1) menuSize))
-handleMenuEvent (EventKey (SpecialKey KeyDown) Down _ _) ss@(StateStack _ (MenuState menu idx:_)) = do
+    return $ MenuState menu (mod (idx + menuSize - 1) menuSize)
+handleMenuEvent (EventKey (SpecialKey KeyDown) Down _ _) = step1 $ \(MenuState menu idx) -> lift $ do
     let menuSize = length (menu^.content)
-    return $ ss&stackTop %~ (\(MenuState menu idx) -> MenuState menu (mod (idx + 1) menuSize))
-handleMenuEvent _ ss@(StateStack _ (MenuState _ _:_)) = do
+    return $ MenuState menu (mod (idx + 1) menuSize)
+handleMenuEvent _ = step1 $ \st -> lift $ do
     lift $ putStrLn "Unhandled Menu State Event"
-    return ss
-handleMenuEvent _ ss = do
-    lift $ putStrLn "Unhandled Menu State"
-    return ss
+    return st
 
-handleMainEvent :: Event -> StateStack -> FrontMod StateStack
-handleMainEvent (EventKey (Char c) Down m _) ss 
-    | ord c == 8 = do
+handleMainEvent :: Event -> GameStepper RespondingFrontMod
+handleMainEvent (EventKey (Char c) Down m _) 
+    | ord c == 8 = step1 $ \gs -> lift $ do
         nn <- uses (input.buffer) (not.null)
         when nn $
             (input.buffer) %= init
-        return ss
-    | otherwise = do
+        return gs
+    | otherwise = step1 $ \gs -> lift $ do
         (input.buffer) %= (++[if shift m == Down then toUpper c else c])
-        return ss 
-handleMainEvent (EventKey (SpecialKey KeySpace) Down _ _) ss = do
+        return gs 
+handleMainEvent (EventKey (SpecialKey KeySpace) Down _ _) = step1 $ \gs -> lift $ do
     (input.buffer) %= (++[' '])
-    return ss
-handleMainEvent (EventKey (SpecialKey KeyShiftL) Down _ _) ss = return ss
-handleMainEvent (EventKey (SpecialKey KeyShiftR) Down _ _) ss = return ss
-handleMainEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
+    return gs
+handleMainEvent (EventKey (SpecialKey KeyShiftL) Down _ _) = step1 return
+handleMainEvent (EventKey (SpecialKey KeyShiftR) Down _ _)  = step1 return
+handleMainEvent (EventKey (SpecialKey KeyUp) Down _ _) = step1 $ \gs -> lift $ do
     st <- use (input.search)
     when (isNothing st) $ do
         curCode <- use (input.buffer)
@@ -177,33 +152,36 @@ handleMainEvent (EventKey (SpecialKey KeyUp) Down _ _) ss = do
     ip <- use (input.historyPointer)
     prefix <- uses (input.history) (reverse . take ip)
     case find (fromJust searchTerm `isPrefixOf`) prefix of
-        Nothing -> return ss
+        Nothing -> return gs
         Just pCode -> do
             (input.historyPointer) .= fromJust (elemIndex pCode (reverse prefix))
             (input.buffer) .= pCode
-            return ss
-handleMainEvent (EventKey (SpecialKey KeyEnter) Down _ _) ss = do
-    code <- use (input.buffer)
-    (input.history) %= (++[code])
-    ihLen <- uses (input.history) length
-    (input.historyPointer) .= ihLen
-    (input.buffer) .= ""
-    (input.search) .= Nothing
-    executeResponses $ executeCommand code ss
-handleMainEvent (EventResize (x,y)) ss = do
+            return gs
+handleMainEvent (EventKey (SpecialKey KeyEnter) Down _ _) = \gs -> do
+    code <- lift $ use (input.buffer)
+    lift $ do
+        (input.history) %= (++[code])
+        ihLen <- uses (input.history) length
+        (input.historyPointer) .= ihLen
+        (input.buffer) .= ""
+        (input.search) .= Nothing
+    RespondingT $ return $ executeCommand code gs
+handleMainEvent (EventResize (x,y)) = step1 $ \gs -> lift $ do
     (fx,fy) <- use $ settings.fontDimensions
     let nx = div x fx
     let ny = div y fy
     (settings.dimensions) .= (nx,ny)
     clearCanvas
-    return ss
-handleMainEvent (EventKey _ Up _ _) ss = return ss
-handleMainEvent (EventKey (MouseButton _) _ _ _) ss = return ss
-handleMainEvent (EventMotion _) ss = return ss
-handleMainEvent (EventKey (SpecialKey KeyEsc) Down _ _) ss = openMainMenu ss
-handleMainEvent e ss = do
+    return gs
+handleMainEvent (EventKey _ Up _ _) = step1 return
+handleMainEvent (EventKey (MouseButton _) _ _ _) = step1 return
+handleMainEvent (EventMotion _) = step1 return
+handleMainEvent (EventKey (SpecialKey KeyEsc) Down _ _) = step1 $ \gs -> do
+    respondT $ OpenMenuResponse "main"
+    return gs
+handleMainEvent e = step1 $ \gs -> lift $ do
     lift $ putStrLn $ "Unhandled Event " ++ show e
-    return ss
+    return gs
 
 updateHandler :: Float -> (StateStack,FrontendState) -> IO (StateStack,FrontendState)
 updateHandler t (ss,fs) = runStateT (stepFrontend t ss) fs

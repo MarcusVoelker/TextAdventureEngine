@@ -1,6 +1,5 @@
 module Logic.DefaultActions where
 
-import Logic.Dialogue
 import Logic.Entity
 import Logic.EntityKind
 import Logic.Event
@@ -77,9 +76,6 @@ takeItem t = withEntity t $ \e -> case e^.kind.takenItem of
         removeEntity r e 
         addToInventory i
         respondString $ "Picked up " ++ t ++ "."
-
-talkTo :: String -> GameAction ()
-talkTo t = withEntity t $ const $ respond $ InitiateDialogueResponse (DialogueTree "Hello there!" $ M.fromList [("bye",Nothing),("hi",Just (DialogueTree "Go away." $ M.singleton "bye" Nothing))])
 
 exit :: Room -> String -> GameAction (Either String Room)
 exit r s = do

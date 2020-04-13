@@ -1,6 +1,7 @@
 module GameData.Text where
 
 import qualified Data.Map as M
+import Data.String
 
 import Serialiser
 
@@ -76,3 +77,9 @@ textLength = sum . map (\case
     Text s -> length s
     RenderText _ rt -> textLength rt
     )
+
+instance IsString MetaLexeme where
+    fromString = RawText
+
+instance IsString ResolvedLexeme where
+    fromString = Text
