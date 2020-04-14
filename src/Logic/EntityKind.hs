@@ -15,6 +15,7 @@ import Logic.Item
 data EntityKind = EntityKind {
     _entityKindIdt :: String,
     _entityKindName :: String,
+    _entityKindDisplayName :: MetaText,
     _entityKindDescription :: MetaText,
     _entityKindVisible :: Bool,
     _entityKindTakenItem :: Maybe Item,

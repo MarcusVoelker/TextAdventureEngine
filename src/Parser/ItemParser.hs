@@ -20,9 +20,10 @@ item :: Parser r [Token] Item
 item = do
     (Object T.Item idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
+    dn <- return ((\(SProp d) -> d) (fromMaybe (SProp name) (lookup "displayName" ps))) >>> metaText
     vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> metaText
     let stack = isJust (lookup "stackable" ps)
-    return $ Item idt name vt stack
+    return $ Item idt name dn vt stack
 
 items :: Parser r [Token] (M.Map String Item)
 items = do

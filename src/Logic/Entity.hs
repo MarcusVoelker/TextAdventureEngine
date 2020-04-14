@@ -39,8 +39,14 @@ instance HasName Entity String where
 instance HasDescription Entity MetaText where
     description = _entityDescriptionLens
     
+instance HasDisplayName Entity MetaText where
+    displayName = _entityDisplayNameLens
+
 _entityNameLens :: Lens' Entity String
 _entityNameLens = kind.name
     
 _entityDescriptionLens :: Lens' Entity MetaText
 _entityDescriptionLens = kind.description
+
+_entityDisplayNameLens :: Lens' Entity MetaText
+_entityDisplayNameLens = kind.displayName

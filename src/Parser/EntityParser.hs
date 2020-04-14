@@ -27,6 +27,7 @@ entity :: M.Map String Room -> M.Map String Item -> Parser r [Token] (Maybe Room
 entity rs is = do
     (Object T.Entity idt ps) <- object
     (SProp name) <- return $ fromMaybe (SProp idt) (lookup "name" ps)
+    dn <- return ((\(SProp d) -> d) (fromMaybe (SProp name) (lookup "displayName" ps))) >>> metaText
     vt <- return ((\(SProp d) -> d) (fromMaybe (SProp "") (lookup "description" ps))) >>> metaText
     let item = lookup "item" ps >>= (\(SProp iName) -> is M.!? iName)
     let room = lookup "location" ps >>= (\(SProp rName) -> rs M.!? rName)
@@ -40,7 +41,7 @@ entity rs is = do
             (PairProp (SProp i, PairProp (SProp "unlockDoor", PairProp (PairProp (SProp dir, SProp r),SProp text)))) -> accept rs is dir r i (Just text)
             _ -> undefined
             ) acs 
-    return (room,EntityKind idt name vt True item ue accepts)
+    return (room,EntityKind idt name dn vt True item ue accepts)
 
 entities :: M.Map String Room -> M.Map String Item -> Parser r [Token] [(Maybe Room,EntityKind)]
 entities rs is = many $ entity rs is

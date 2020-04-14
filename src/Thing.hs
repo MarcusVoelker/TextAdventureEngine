@@ -8,6 +8,9 @@ class HasName s a | s -> a where
 class HasDescription s a | s -> a where
     description :: Lens' s a
 
+class HasDisplayName s a | s -> a where
+    displayName :: Lens' s a
+    
 class HasIdt s a | s -> a where
     idt :: Lens' s a
 
