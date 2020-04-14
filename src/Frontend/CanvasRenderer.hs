@@ -12,24 +12,24 @@ import qualified Data.Map.Strict as M
 import Data.Maybe
 import Graphics.Gloss
 
+import Thing
+
 renderContent :: CellContent -> FrontRead Picture
 renderContent BlankCell = return Blank
 renderContent (CharCell c) = return (renderChar c)
 renderContent CursorCell = do
   et <- view elapsedTime
-  return $ if mod (floor (et*0.7)) 2 == 1 then rect (0,0) (7,15) else Blank
+  return $ if mod (floor et) 2 == 1 then rect (0,0) (7,15) else Blank
+renderContent (EffectCell Shake c) = do
+    et <- view elapsedTime
+    Translate 0 (fromIntegral (mod (floor (et*30)) 5)-2) <$> renderContent c
+renderContent (EffectCell (Coloured r g b) c) = Color (makeColor (fromIntegral r/255) (fromIntegral g/255) (fromIntegral b/255) 1) <$> renderContent c
 
 renderCell :: (Int,Int) -> CanvasCell -> FrontRead Picture
 renderCell (x,y) cell = do
     (fw,fh) <- views (settings.fontDimensions) (bimap fromIntegral fromIntegral)
     pic <- renderContent (cell^.content)
-    if isNothing (cell^.fadeout) then
-        return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Color green pic
-    else do
-        et <- view elapsedTime
-        let (f,c) = fromJust (cell^.fadeout)
-        fpic <- renderContent c
-        return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Pictures [Color (makeColor 0 1 0 (f-et)) fpic,Color green pic]
+    return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Color green pic
 
 renderCanvas :: FrontRead Picture
 renderCanvas = do

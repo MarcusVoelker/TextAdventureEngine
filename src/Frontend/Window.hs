@@ -6,6 +6,8 @@ import Frontend.FrontState
 import Frontend.State
 import Frontend.Text
 
+import GameData.Text
+
 import Logic.StateStack
 
 import Control.Lens
@@ -51,8 +53,9 @@ renderWindow ss win = do
     writeToCanvas (x,y') (CharCell $ sty^.cBLStyle)
     writeToCanvas (x',y') (CharCell $ sty^.cBRStyle)
     forM_ [(px,py) | px <- [x+1..x'-1], py <- [y+1..y'-1]] clearCell
-    sequence_ $ concat $ zipWith (\py -> zipWith (\px -> writeToCanvas (px,py) . CharCell) [x+1..x'-1])  [y+1..y'-1] $ v ss fs
+    let code = case stateAt (win^.context) ss of Nothing -> [["Unknown Context" :: ResolvedLexeme],[Text $ show (win^.context)]]; Just st -> v st fs
+    sequence_ $ concat $ zipWith (\py -> zipWith (\px -> writeToCanvas (px,py)) [x+1..x'-1]) [y+1..y'-1] $ map cellize code
     when (hnd == 0) $ do
-        let cy = length (v ss fs)
-        let cx = length (last (v ss fs))
+        let cy = length code
+        let cx = length (cellize $ last code)
         writeToCanvas (x+cx+1,y+cy) CursorCell

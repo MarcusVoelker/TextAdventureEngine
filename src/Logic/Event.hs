@@ -1,9 +1,8 @@
 module Logic.Event where
 
-import Logic.Dialogue
 import Logic.Item
 
-import Map.Room
+import GameData.Room
 
 import Control.Lens
 
@@ -16,9 +15,4 @@ data UseEvent = UnlockDoor {
     _useEventText :: String
 } | GenericUseEvent
 
-newtype TalkEvent = TalkEvent {
-    _talkEventDialogueTree :: DialogueTree
-}
-
 makeFields ''UseEvent
-makeFields ''TalkEvent

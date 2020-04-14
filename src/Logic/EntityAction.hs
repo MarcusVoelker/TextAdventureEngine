@@ -5,7 +5,7 @@ import Logic.GameState
 import Logic.Interaction
 import Logic.Response
 
-import Map.Room
+import GameData.Room
 
 import Thing
 
