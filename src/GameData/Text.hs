@@ -26,6 +26,7 @@ instance Persistent VarCondition ctx where
             '?' -> CIsTrue <$> deserialise
             '!' -> CNot <$> deserialise
             '=' -> CEqual <$> deserialise <*> deserialise
+            _ -> fail "Unknown Encoding"
 
 instance Serialisable RenderDirection where
     serialise Shake = serialise 's'
@@ -37,6 +38,7 @@ instance Persistent RenderDirection ctx where
         case c of
             's' -> return Shake
             'c' -> Color <$> deserialise <*> deserialise <*> deserialise
+            _ -> fail "Unknown Encoding"
 
 instance Serialisable MetaLexeme where
     serialise (RawText s) = serialise 's' <> serialise s
@@ -50,6 +52,7 @@ instance Persistent MetaLexeme ctx where
             's' -> RawText <$> deserialise
             'r' -> MRenderText <$> deserialise <*> deserialise
             'c' -> ConditionalText <$> deserialise <*> deserialise
+            _ -> fail "Unknown Encoding"
 
 
 data ResolvedLexeme = Text String | RenderText RenderDirection ResolvedText

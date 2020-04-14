@@ -6,7 +6,6 @@ import Text.LParse.Parser
 import Text.LParse.Prebuilt
 
 import Control.Applicative
-import Data.List
 
 true :: Parser r String VarCondition
 true = consume "true" >> return CTrue

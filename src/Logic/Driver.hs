@@ -1,5 +1,6 @@
 module Logic.Driver where
 
+import Logic.Interaction
 import Logic.Response
 import Logic.StateStack
 import Parser.ActionParser
@@ -14,3 +15,6 @@ executeCommand :: String -> GameStepper Responding
 executeCommand command = step1 $ \gs -> parse action command 
         (`execStateT` gs)
         (const $ Responding [TextResponse $ liftString "I did not understand that."] gs)
+
+executeAction :: GameAction () -> GameStepper Responding
+executeAction action = step1 $ execStateT action

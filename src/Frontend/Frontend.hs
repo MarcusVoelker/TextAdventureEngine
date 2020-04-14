@@ -63,7 +63,7 @@ openMainMenu ss = do
         (Absolute (-1)) 
         (Absolute (-1))
         (\st _ -> applyMenuFunction [liftString "Nobody here but us chickens!"] renderMenu st)
-        1
+        (contextCount ss)
     return ss'
 
 executeResponse :: StateStack -> Response -> FrontMod StateStack
@@ -72,11 +72,13 @@ executeResponse ss (TextResponse s) = do
     return ss
 executeResponse ss (OpenMenuResponse "main") = openMainMenu ss
 executeResponse ss LeaveContextResponse = do
-    closeContextWindows $ contextCount ss
+    closeContextWindows (contextCount ss - 1)
     return $ closeContext ss
 executeResponse ss SaveResponse = lift (saveObject "save.dat" (ss^.globalGameState)) >> return ss
-executeResponse _ LoadResponse = do
+executeResponse ss LoadResponse = do
+    forM_ [1..contextCount ss - 1] closeContextWindows
     dc <- use deserialisationContext
+    textHistory .= [["Loaded Savegame"]]
     buildStateStack <$> lift (loadObject "save.dat" dc)
 executeResponse _ QuitResponse = lift exitSuccess
 executeResponse _ _ = lift $ throwIO $ PatternMatchFail "Unhandled Response!"
@@ -85,7 +87,6 @@ executeResponses :: RespondingFrontMod StateStack -> FrontMod StateStack
 executeResponses rfm = do
     (Responding responses ss) <- runRespondingT rfm
     foldM executeResponse ss responses
-
     
 initialInputState :: InputState 
 initialInputState = InputState [] [] 0 Nothing
@@ -124,6 +125,13 @@ handleMenuEvent (EventKey (SpecialKey KeyUp) Down _ _) = step1 $ \(MenuState men
 handleMenuEvent (EventKey (SpecialKey KeyDown) Down _ _) = step1 $ \(MenuState menu idx) -> lift $ do
     let menuSize = length (menu^.content)
     return $ MenuState menu (mod (idx + 1) menuSize)
+handleMenuEvent (EventKey (SpecialKey KeyEnter) Down _ _) = step1 $ \ms@(MenuState menu idx) -> do
+    respondsT (((menu^.content) !! idx)^.content.action)
+    return ms
+handleMenuEvent (EventKey (SpecialKey KeyEsc) Down _ _) = step1 $ \ms -> do 
+    respondT LeaveContextResponse
+    return ms
+handleMenuEvent (EventKey _ Up _ _) = step1 return
 handleMenuEvent _ = step1 $ \st -> lift $ do
     lift $ putStrLn "Unhandled Menu State Event"
     return st

@@ -58,7 +58,10 @@ instance (Monoid a) => Monoid (Responding a) where
     mempty = return mempty
 
 respondT :: (Monad m) => Response -> RespondingT m ()
-respondT r = RespondingT $ return $ Responding [r] ()
+respondT r = respondsT [r] 
+
+respondsT :: (Monad m) => [Response] -> RespondingT m ()
+respondsT r = RespondingT $ return $ Responding r ()
 
 respond :: Response -> StateT s Responding ()
 respond r = responds [r]

@@ -19,8 +19,6 @@ module Logic.StateStack (
     MenuStepper,
     Stepper(..),
     StateResult(..),
-    push,
-    pop,
     step0,
     step1,
     step2,
@@ -103,15 +101,6 @@ applyGameFunctionM f (SSGame ss) = f ss
 applyGameFunctionM _ _ = fail "Expected Game State!"
 
 data StateResult a = Pop | Change a | Push a [StackedState]
-
-push :: StackedState -> StateResult a -> StateResult a
-push ss (Change a) = Push a [ss]
-push ss (Push a sss) = Push a (ss:sss)
-
-pop :: StateResult a -> StateResult a
-pop (Change a) = Pop
-pop (Push a [ss]) = Change a
-pop (Push a (ss:sss)) = Push a sss
 
 type SStepper m a = a -> m (StateResult a)
 

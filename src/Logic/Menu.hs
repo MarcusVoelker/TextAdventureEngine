@@ -3,21 +3,21 @@ module Logic.Menu where
 import Control.Lens
 
 import GameData.Text
-import Logic.DefaultActions
 import Logic.Interaction
+import Logic.Response
 
 import Thing
 
-data MenuEntryContent = MenuAction {
-    _menuEntryContentAction :: GameAction ()
-} | MenuBack
+newtype MenuEntryContent = MenuAction {
+    _menuEntryContentAction :: [Response]
+} 
 
 data MenuEntry = MenuEntry {
     _menuEntryName :: MetaText,
     _menuEntryContent :: MenuEntryContent
 }
 
-data Menu = Menu {
+newtype Menu = Menu {
     _menuContent :: [MenuEntry]
 }
 
@@ -27,8 +27,8 @@ makeFields ''Menu
 
 mainMenu :: Menu
 mainMenu = Menu [
-    MenuEntry [RawText "Start"] MenuBack,
-    MenuEntry [RawText "Save"] (MenuAction save),
-    MenuEntry [RawText "Load"] (MenuAction load),
-    MenuEntry [RawText "Quit"] (MenuAction quit)
+    MenuEntry [RawText "Continue"] (MenuAction [LeaveContextResponse]),
+    MenuEntry [RawText "Save"] (MenuAction [SaveResponse]),
+    MenuEntry [RawText "Load"] (MenuAction [LoadResponse]),
+    MenuEntry [RawText "Quit"] (MenuAction [QuitResponse])
     ]
