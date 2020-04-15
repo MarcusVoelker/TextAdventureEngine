@@ -119,39 +119,39 @@ handleEvent :: Event -> StateStack -> FrontMod StateStack
 handleEvent e ss = executeResponses $ stepStateStack (Stepper (handleMainEvent e) (handleMenuEvent e)) ss
 
 handleMenuEvent :: Event -> MenuStepper RespondingFrontMod
-handleMenuEvent (EventKey (SpecialKey KeyUp) Down _ _) = step1 $ \(MenuState menu idx) -> lift $ do
+handleMenuEvent (EventKey (SpecialKey KeyUp) Down _ _) = \(MenuState menu idx) -> lift $ do
     let menuSize = length (menu^.content)
     return $ MenuState menu (mod (idx + menuSize - 1) menuSize)
-handleMenuEvent (EventKey (SpecialKey KeyDown) Down _ _) = step1 $ \(MenuState menu idx) -> lift $ do
+handleMenuEvent (EventKey (SpecialKey KeyDown) Down _ _) = \(MenuState menu idx) -> lift $ do
     let menuSize = length (menu^.content)
     return $ MenuState menu (mod (idx + 1) menuSize)
-handleMenuEvent (EventKey (SpecialKey KeyEnter) Down _ _) = step1 $ \ms@(MenuState menu idx) -> do
+handleMenuEvent (EventKey (SpecialKey KeyEnter) Down _ _) = \ms@(MenuState menu idx) -> do
     respondsT (((menu^.content) !! idx)^.content.action)
     return ms
-handleMenuEvent (EventKey (SpecialKey KeyEsc) Down _ _) = step1 $ \ms -> do 
+handleMenuEvent (EventKey (SpecialKey KeyEsc) Down _ _) = \ms -> do 
     respondT LeaveContextResponse
     return ms
-handleMenuEvent (EventKey _ Up _ _) = step1 return
-handleMenuEvent _ = step1 $ \st -> lift $ do
+handleMenuEvent (EventKey _ Up _ _) = return
+handleMenuEvent _ =  \st -> lift $ do
     lift $ putStrLn "Unhandled Menu State Event"
     return st
 
 handleMainEvent :: Event -> GameStepper RespondingFrontMod
 handleMainEvent (EventKey (Char c) Down m _) 
-    | ord c == 8 = step1 $ \gs -> lift $ do
+    | ord c == 8 =  \gs -> lift $ do
         nn <- uses (input.buffer) (not.null)
         when nn $
             (input.buffer) %= init
         return gs
-    | otherwise = step1 $ \gs -> lift $ do
+    | otherwise =  \gs -> lift $ do
         (input.buffer) %= (++[if shift m == Down then toUpper c else c])
         return gs 
-handleMainEvent (EventKey (SpecialKey KeySpace) Down _ _) = step1 $ \gs -> lift $ do
+handleMainEvent (EventKey (SpecialKey KeySpace) Down _ _) = \gs -> lift $ do
     (input.buffer) %= (++[' '])
     return gs
-handleMainEvent (EventKey (SpecialKey KeyShiftL) Down _ _) = step1 return
-handleMainEvent (EventKey (SpecialKey KeyShiftR) Down _ _)  = step1 return
-handleMainEvent (EventKey (SpecialKey KeyUp) Down _ _) = step1 $ \gs -> lift $ do
+handleMainEvent (EventKey (SpecialKey KeyShiftL) Down _ _) = return
+handleMainEvent (EventKey (SpecialKey KeyShiftR) Down _ _)  = return
+handleMainEvent (EventKey (SpecialKey KeyUp) Down _ _) = \gs -> lift $ do
     st <- use (input.search)
     when (isNothing st) $ do
         curCode <- use (input.buffer)
@@ -174,20 +174,20 @@ handleMainEvent (EventKey (SpecialKey KeyEnter) Down _ _) = \gs -> do
         (input.buffer) .= ""
         (input.search) .= Nothing
     RespondingT $ return $ executeCommand code gs
-handleMainEvent (EventResize (x,y)) = step1 $ \gs -> lift $ do
+handleMainEvent (EventResize (x,y)) =  \gs -> lift $ do
     (fx,fy) <- use $ settings.fontDimensions
     let nx = div x fx
     let ny = div y fy
     (settings.dimensions) .= (nx,ny)
     clearCanvas
     return gs
-handleMainEvent (EventKey _ Up _ _) = step1 return
-handleMainEvent (EventKey (MouseButton _) _ _ _) = step1 return
-handleMainEvent (EventMotion _) = step1 return
-handleMainEvent (EventKey (SpecialKey KeyEsc) Down _ _) = step1 $ \gs -> do
+handleMainEvent (EventKey _ Up _ _) = return
+handleMainEvent (EventKey (MouseButton _) _ _ _) = return
+handleMainEvent (EventMotion _) = return
+handleMainEvent (EventKey (SpecialKey KeyEsc) Down _ _) =  \gs -> do
     respondT $ OpenMenuResponse "main"
     return gs
-handleMainEvent e = step1 $ \gs -> lift $ do
+handleMainEvent e =  \gs -> lift $ do
     lift $ putStrLn $ "Unhandled Event " ++ show e
     return gs
 

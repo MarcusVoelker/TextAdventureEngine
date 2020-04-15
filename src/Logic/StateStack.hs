@@ -18,10 +18,6 @@ module Logic.StateStack (
     GameStepper,
     MenuStepper,
     Stepper(..),
-    StateResult(..),
-    step0,
-    step1,
-    step2,
     stepStateStack
     ) where
 
@@ -100,9 +96,7 @@ applyGameFunctionM :: (MonadFail m) => (GameState -> m a) -> StackedState -> m a
 applyGameFunctionM f (SSGame ss) = f ss
 applyGameFunctionM _ _ = fail "Expected Game State!"
 
-data StateResult a = Pop | Change a | Push a [StackedState]
-
-type SStepper m a = a -> m (StateResult a)
+type SStepper m a = a -> m a
 
 type GameStepper m = SStepper m GameState
 type MenuStepper m = SStepper m MenuState
@@ -114,26 +108,9 @@ data Stepper m = Stepper {
 
 makeFields ''Stepper
 
-step0 :: (Monad m) => SStepper m a
-step0 _ = return Pop
-
-step1 :: (Monad m) => (a -> m a) -> SStepper m a
-step1 f gs = f gs >>= (\gs -> return (Change gs))
-
-step2 :: (Monad m) => (a -> m (a,StackedState)) -> SStepper m a
-step2 f gs = f gs >>= (\(gs,ss) -> return (Push gs [ss]))
-
 stepStateStack :: (Monad m) => Stepper m -> StateStack -> m StateStack
-stepStateStack stepper (StateStack (SSMenu x:xs)) = (stepper^.menuStepper) x >>= (\case 
-    Pop -> return $ StateStack xs
-    Change ms -> return $ StateStack (SSMenu ms:xs)
-    Push ms ns -> return $ StateStack (ns++(SSMenu ms:xs))
-    )
-stepStateStack stepper (StateStack (SSGame x:xs)) = (stepper^.gameStepper) x >>= (\case 
-    Pop -> return $ StateStack xs
-    Change gs -> return $ StateStack (SSGame gs:xs)
-    Push gs ns -> return $ StateStack (ns++(SSGame gs:xs))
-    )
+stepStateStack stepper (StateStack (SSMenu x:xs)) = (stepper^.menuStepper) x >>= (\ms -> return $ StateStack (SSMenu ms:xs))
+stepStateStack stepper (StateStack (SSGame x:xs)) = (stepper^.gameStepper) x >>= (\ms -> return $ StateStack (SSGame ms:xs))
 stepStateStack _ (StateStack []) = return (StateStack [])
 
 menuState :: Menu -> StackedState

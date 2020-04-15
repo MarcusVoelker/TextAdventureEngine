@@ -12,9 +12,9 @@ import Control.Monad.Trans.State
 import Text.LParse.Parser
 
 executeCommand :: String -> GameStepper Responding
-executeCommand command = step1 $ \gs -> parse action command 
+executeCommand command gs = parse action command 
         (`execStateT` gs)
         (const $ Responding [TextResponse $ liftString "I did not understand that."] gs)
 
 executeAction :: GameAction () -> GameStepper Responding
-executeAction action = step1 $ execStateT action
+executeAction = execStateT
