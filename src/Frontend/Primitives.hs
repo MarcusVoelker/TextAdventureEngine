@@ -1,15 +1,21 @@
 module Frontend.Primitives where
 
-import Graphics.Gloss
+type Color = (Double,Double,Double,Double)
+data Picture = Blank | Pictures [Picture] | Translate Float Float Picture | Color Color Picture
+
+makeColor = (,,,)
+
+green :: Color
+green = undefined
 
 rect :: (Float,Float) -> (Float,Float) -> Picture
-rect (x,y) (w,h) = Polygon [(x,y),(x+w,y),(x+w,y+h),(x,y+h)]
+rect = undefined
 
 hline :: (Float,Float) -> Float -> Picture
-hline (x,y) l = rect (x,y) (l,1)
+hline = undefined
 
 vline :: (Float,Float) -> Float -> Picture
-vline (x,y) l = rect (x,y) (1,l)
+vline = undefined
 
 pix :: (Float,Float) -> Picture
-pix (x,y) = rect (x,y) (1,1)
+pix = undefined

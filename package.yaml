@@ -28,7 +28,10 @@ dependencies:
 - utf8-string
 - filepath
 - lens
-- gloss
+- GLFW-b
+- OpenGL
+- OpenGLRaw
+- GLURaw
 
 library:
   source-dirs: src

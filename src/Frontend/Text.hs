@@ -3,7 +3,6 @@ module Frontend.Text where
 import Frontend.Primitives
 
 import qualified Data.Map.Strict as M
-import Graphics.Gloss
 
 bSHLine :: Char
 bSHLine = '─'

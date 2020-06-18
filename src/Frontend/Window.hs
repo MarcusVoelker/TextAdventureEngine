@@ -52,7 +52,7 @@ renderWindow ss win = do
     writeToCanvas (x',y) (CharCell $ sty^.cTRStyle)
     writeToCanvas (x,y') (CharCell $ sty^.cBLStyle)
     writeToCanvas (x',y') (CharCell $ sty^.cBRStyle)
-    forM_ [(px,py) | px <- [x+1..x'-1], py <- [y+1..y'-1]] clearCell
+    --forM_ [(px,py) | px <- [x+1..x'-1], py <- [y+1..y'-1]] clearCell
     let code = case stateAt (win^.context) ss of Nothing -> [["Unknown Context" :: ResolvedLexeme],[Text $ show (win^.context)]]; Just st -> v st fs
     sequence_ $ concat $ zipWith (\py -> zipWith (\px -> writeToCanvas (px,py)) [x+1..x'-1]) [y+1..y'-1] $ map cellize code
     when (hnd == 0) $ do

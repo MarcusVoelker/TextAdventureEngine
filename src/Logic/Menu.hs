@@ -3,7 +3,6 @@ module Logic.Menu where
 import Control.Lens
 
 import GameData.Text
-import Logic.Interaction
 import Logic.Response
 
 import Thing

@@ -31,7 +31,13 @@ import qualified Data.Map.Strict as M
 import Data.Maybe
 import System.Exit
 
-import Graphics.Gloss.Interface.IO.Game hiding (Text)
+data Event = EventKey Key Dir () () | EventMotion () | EventResize (Int,Int) deriving (Show)
+data Key = SpecialKey SKey | MouseButton () | Char Char deriving (Show)
+data SKey = KeyEnter | KeyDown | KeyUp | KeyLeft | KeyRight | KeyEsc | KeyShiftR | KeyShiftL | KeySpace deriving (Show)
+data Dir = Up | Down deriving (Show,Eq)
+
+shift :: () -> Dir
+shift = const Up
 
 openTopWindow :: ScreenLoc -> ScreenLoc -> ScreenLoc -> ScreenLoc -> ContentView -> Int -> FrontMod ()
 openTopWindow x y w h v c = do

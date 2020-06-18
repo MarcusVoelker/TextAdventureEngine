@@ -1,4 +1,4 @@
 Config main
   windowTitle: "Demo Game"
-  windowSize: "full"
+  windowSize: ("960","640")
   initialRoom : "s"

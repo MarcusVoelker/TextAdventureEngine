@@ -10,7 +10,6 @@ import Control.Lens
 import Control.Monad
 import qualified Data.Map.Strict as M
 import Data.Maybe
-import Graphics.Gloss
 
 import Thing
 
@@ -51,7 +50,7 @@ writeToCanvas pos c = do
 
 clearCell :: (Int,Int) -> FrontMod () 
 clearCell pos = do
-    c <- use (canvas.grid.at pos)
+    c <- use (fusing (canvas.grid.at pos))
     when (isJust c && (fromJust c^.content /= BlankCell)) $ writeToCanvas pos BlankCell
 
 clearCanvas :: FrontMod () 
