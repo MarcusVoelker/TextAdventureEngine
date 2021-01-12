@@ -279,22 +279,13 @@ display ssr fsr = do
     renderHandler (ss,fs)
     flush
 
-{-screenEffect :: FrontRead (IO ())
-screenEffect = do
+renderFrontend :: FrontRead ()
+renderFrontend = do
     (cw, ch) <- views (settings . dimensions) (bimap fromIntegral fromIntegral)
     (fw, fh) <- views (settings . fontDimensions)
                       (bimap fromIntegral fromIntegral)
-    let w = fw * cw
-    let h = fh * ch
-    return $ Translate (fw * (-cw / 2)) (fh * (ch / 2)) $ Pictures $ map
-        (\y -> Color (makeColor 0 (fromIntegral (mod y 2)) 0 0.1)
-            $ rect (0, -2 * fromIntegral y) (w, 2)
-        )
-        [0 .. div (round h - 1) 2]-}
-
-renderFrontend :: FrontRead ()
-renderFrontend = do
-    --se <- screenEffect
-    lift $ clear [ ColorBuffer ]
-    cv <- renderCanvas
-    lift $ cv
+    lift $ do
+        clear [ ColorBuffer ]
+        loadIdentity
+        ortho 0 (cw*fw) 0 (ch*fh) (-5) (5)
+    renderCanvas >>= lift

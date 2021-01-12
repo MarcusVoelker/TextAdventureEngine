@@ -19,7 +19,9 @@ type Rendering = IO ()
 
 renderContent :: CellContent -> FrontRead Rendering
 renderContent BlankCell = return $ return ()
-renderContent (CharCell c) = return (renderChar c)
+renderContent (CharCell c) = return $ do
+    color $ Color3 (0 :: GLfloat) 1 0
+    renderChar c
 renderContent CursorCell = do
   et <- get elapsedTime
   return $ if mod et 2000 < 1000 then rect (0,0) (7,15) else return ()
@@ -48,10 +50,6 @@ renderCanvas :: FrontRead Rendering
 renderCanvas = do
     (cw,ch) <- views (settings.dimensions) (bimap fromIntegral fromIntegral)
     (fw,fh) <- views (settings.fontDimensions) (bimap fromIntegral fromIntegral)
-    lift $ do
-        loadIdentity
-        ortho 0 (cw*fw) 0 (ch*fh) (-5) (5)
-        clear [ColorBuffer]
     g <- view (canvas.grid)
     sequence_ <$> sequence (M.foldrWithKey (\pos cell list -> renderCell pos cell : list) [] g)
 
