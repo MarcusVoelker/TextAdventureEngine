@@ -54,7 +54,6 @@ data FrontendState = FrontendState {
     _frontendStateCanvas :: CanvasState,
     _frontendStateWindows :: M.Map WHandle Window,
     _frontendStateSettings :: FrontendSettings,
-    _frontendStateElapsedTime :: Float,
     _frontendStateDeserialisationContext :: DeserialisationContext
 }
 

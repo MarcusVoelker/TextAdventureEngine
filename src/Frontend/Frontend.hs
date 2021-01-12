@@ -30,7 +30,7 @@ import           Data.IORef
 import           Data.List
 import qualified Data.Map.Strict               as M
 import           Data.Maybe
-import           Graphics.UI.GLUT hiding (rect,Text,elapsedTime,Color)
+import           Graphics.UI.GLUT hiding (rect,Text,Color)
 import           System.Exit
 
 openTopWindow
@@ -152,7 +152,6 @@ initialFrontendState (w, h) (fw, fh) = FrontendState
         ]
     )
     (FrontendSettings (w, h) (fw, fh))
-    0
 
 {-
 eventHandler :: Event -> IORef StateStack -> IORef FrontendState -> IO ()
@@ -239,23 +238,23 @@ handleMainEvent e = \gs -> lift $ do
     return gs
 -}
 updateHandler
-    :: Float -> (StateStack, FrontendState) -> IO (StateStack, FrontendState)
-updateHandler t (ss, fs) = runStateT (stepFrontend t ss) fs
+    :: (StateStack, FrontendState) -> IO (StateStack, FrontendState)
+updateHandler (ss, fs) = runStateT (stepFrontend ss) fs
 
-stepFrontend :: Float -> StateStack -> FrontMod StateStack
-stepFrontend t ss = do
+stepFrontend :: StateStack -> FrontMod StateStack
+stepFrontend ss = do
     wins <- M.elems <$> use windows
     mapM_ (renderWindow ss) wins
-    elapsedTime %= (+ t)
     return ss
 
-update :: IORef StateStack -> IORef FrontendState -> DisplayCallback
-update ssr fsr = do
+idle :: IORef StateStack -> IORef FrontendState -> IdleCallback
+idle ssr fsr = do
     ss <- readIORef ssr
     fs <- readIORef fsr
-    (ss',fs') <- updateHandler 0.1 (ss,fs)
+    (ss',fs') <- updateHandler (ss,fs)
     writeIORef ssr ss'
     writeIORef fsr fs'
+    postRedisplay Nothing
 
 
 renderHandler :: (StateStack, FrontendState) -> IO ()
@@ -263,7 +262,6 @@ renderHandler (_, fs) = runReaderT renderFrontend fs
 
 display :: IORef StateStack -> IORef FrontendState -> DisplayCallback
 display ssr fsr = do
-    update ssr fsr
     ss <- readIORef ssr
     fs <- readIORef fsr
     renderHandler (ss,fs)

@@ -14,7 +14,7 @@ data CellContent = BlankCell | CharCell Char | EffectCell CellEffect CellContent
 
 data CanvasCell = CanvasCell {
     _canvasCellContent :: CellContent,
-    _canvasCellFadeout :: Maybe (Float,CellContent)
+    _canvasCellFadeout :: Maybe (Int,CellContent)
 } deriving (Show)
 
 newtype CanvasState = CanvasState {

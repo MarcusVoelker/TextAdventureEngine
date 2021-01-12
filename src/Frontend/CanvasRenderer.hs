@@ -11,7 +11,7 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import qualified Data.Map.Strict as M
 import Data.Maybe
-import Graphics.UI.GLUT hiding (elapsedTime, rect)
+import Graphics.UI.GLUT hiding (rect)
 
 import Thing
 
@@ -21,13 +21,13 @@ renderContent :: CellContent -> FrontRead Rendering
 renderContent BlankCell = return $ return ()
 renderContent (CharCell c) = return (renderChar c)
 renderContent CursorCell = do
-  et <- view elapsedTime
-  return $ if mod (floor et) 2 == 1 then rect (0,0) (7,15) else return ()
+  et <- get elapsedTime
+  return $ if mod et 2000 < 1000 then rect (0,0) (7,15) else return ()
 renderContent (EffectCell Shake c) = do
-    et <- view elapsedTime
+    et <- get elapsedTime
     content <- renderContent c
     return $ preservingMatrix $ do
-        translate $ Vector3 (0 :: GLdouble) (fromIntegral (mod (floor (et*30)) 5)-2) 0
+        translate $ Vector3 (0 :: GLdouble) (fromIntegral (mod (div (et*3) 100) 5)-2) 0
         content
 renderContent (EffectCell (Coloured r g b) c) = do
     content <- renderContent c
@@ -58,10 +58,10 @@ renderCanvas = do
 writeToCanvas :: (Int,Int) -> CellContent -> FrontMod ()
 writeToCanvas pos c = do
     curC <- use (canvas.grid.at pos)
-    et <- use elapsedTime
+    et <- get elapsedTime
     (canvas.grid.at pos) ?= CanvasCell c (curC >>= (\curCC ->
         if (curCC^.content /= BlankCell) && (curCC^.content /= CursorCell) && c == BlankCell then
-            Just (et+0.1,curCC^.content)
+            Just (et+100,curCC^.content)
         else
             curCC^.fadeout
         ))
