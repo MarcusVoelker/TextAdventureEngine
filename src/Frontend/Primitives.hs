@@ -1,21 +1,20 @@
 module Frontend.Primitives where
 
-type Color = (Double,Double,Double,Double)
-data Picture = Blank | Pictures [Picture] | Translate Float Float Picture | Color Color Picture
+import Graphics.UI.GLUT hiding (rect)
 
-makeColor = (,,,)
+vertex3f :: (Integral a) => (a, a, a) -> IO ()
+vertex3f (x, y, z) = vertex $ Vertex3 ((fromIntegral x) :: GLfloat) (fromIntegral y) (fromIntegral z)
 
-green :: Color
-green = undefined
+rect :: (Int,Int) -> (Int,Int) -> IO ()
+rect (xa,ya) (xb,yb) = renderPrimitive Quads $ do
+    color $ Color3 (0 :: GLfloat) 1 0
+    mapM_ vertex3f [(xa,ya,0),(xa,yb,0),(xb,yb,0),(xb,ya,0)]
 
-rect :: (Float,Float) -> (Float,Float) -> Picture
-rect = undefined
+hline :: (Int,Int) -> Int -> IO ()
+hline (x,y) l = rect (x,y) (x+l,y+1)
 
-hline :: (Float,Float) -> Float -> Picture
-hline = undefined
+vline :: (Int,Int) -> Int -> IO ()
+vline (x,y) l = rect (x,y) (x+1,y+l)
 
-vline :: (Float,Float) -> Float -> Picture
-vline = undefined
-
-pix :: (Float,Float) -> Picture
-pix = undefined
+pix :: (Int,Int) -> IO ()
+pix (x,y) = rect (x,y) (x+1,y+1)

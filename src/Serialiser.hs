@@ -18,9 +18,9 @@ class Serialisable a where
     serialise :: a -> Builder
 
 class (Serialisable a) => Persistent a ctx where
-    deserialise :: StateT ByteString (Reader ctx) a
+    deserialise :: StateT ByteString (ReaderT ctx Maybe) a
 
-extractWord :: StateT ByteString (Reader ctx) Word8
+extractWord :: StateT ByteString (ReaderT ctx Maybe) Word8
 extractWord = do
     bs <- get
     case B.uncons bs of
@@ -61,7 +61,7 @@ instance (Serialisable a) => Serialisable [a] where
 
 instance (Persistent a ctx) => Persistent [a] ctx where
     deserialise = do
-        s <- deserialise :: StateT ByteString (Reader ctx) Int
+        s <- deserialise :: StateT ByteString (ReaderT ctx Maybe) Int
         forM [1..s] $ const deserialise
 
 instance (Ord k, Serialisable k , Serialisable a) => Serialisable (M.Map k a) where
@@ -69,7 +69,7 @@ instance (Ord k, Serialisable k , Serialisable a) => Serialisable (M.Map k a) wh
 
 instance (Ord k, Persistent k ctx, Persistent a ctx) => Persistent (M.Map k a) ctx where
     deserialise = do
-        s <- deserialise :: StateT ByteString (Reader ctx) Int
+        s <- deserialise :: StateT ByteString (ReaderT ctx Maybe) Int
         l <- forM [1..s] $ \_ -> do
             key <- deserialise
             val <- deserialise
@@ -82,4 +82,6 @@ saveObject path o = B.writeFile path (toLazyByteString $ serialise o)
 loadObject :: (Persistent a ctx) => String -> ctx -> IO a
 loadObject path ctx = do
     bs <- B.readFile path
-    return $ runReader (evalStateT deserialise bs) ctx
+    case runReaderT (evalStateT deserialise bs) ctx of
+        Nothing -> fail "Couldn't parse"
+        Just res -> return res

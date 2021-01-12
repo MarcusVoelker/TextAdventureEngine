@@ -8,34 +8,52 @@ import Frontend.Text
 
 import Control.Lens
 import Control.Monad
+import Control.Monad.Trans.Class
 import qualified Data.Map.Strict as M
 import Data.Maybe
+import Graphics.UI.GLUT hiding (elapsedTime, rect)
 
 import Thing
 
-renderContent :: CellContent -> FrontRead Picture
-renderContent BlankCell = return Blank
+type Rendering = IO ()
+
+renderContent :: CellContent -> FrontRead Rendering
+renderContent BlankCell = return $ return ()
 renderContent (CharCell c) = return (renderChar c)
 renderContent CursorCell = do
   et <- view elapsedTime
-  return $ if mod (floor et) 2 == 1 then rect (0,0) (7,15) else Blank
+  return $ if mod (floor et) 2 == 1 then rect (0,0) (7,15) else return ()
 renderContent (EffectCell Shake c) = do
     et <- view elapsedTime
-    Translate 0 (fromIntegral (mod (floor (et*30)) 5)-2) <$> renderContent c
-renderContent (EffectCell (Coloured r g b) c) = Color (makeColor (fromIntegral r/255) (fromIntegral g/255) (fromIntegral b/255) 1) <$> renderContent c
+    content <- renderContent c
+    return $ preservingMatrix $ do
+        translate $ Vector3 (0 :: GLdouble) (fromIntegral (mod (floor (et*30)) 5)-2) 0
+        content
+renderContent (EffectCell (Coloured r g b) c) = do
+    content <- renderContent c
+    return $ do
+        color $ Color3 (fromIntegral r/255 :: GLdouble) (fromIntegral g/255) (fromIntegral b/255)
+        content
 
-renderCell :: (Int,Int) -> CanvasCell -> FrontRead Picture
+renderCell :: (Int,Int) -> CanvasCell -> FrontRead Rendering
 renderCell (x,y) cell = do
+    (cw,ch) <- views (settings.dimensions) (bimap fromIntegral fromIntegral)
     (fw,fh) <- views (settings.fontDimensions) (bimap fromIntegral fromIntegral)
-    pic <- renderContent (cell^.content)
-    return $ Translate (fromIntegral x*fw) (-fromIntegral y*fh) $ Color green pic
+    content <- renderContent (cell^.content)
+    return $ preservingMatrix $ do 
+        translate $ Vector3 (fromIntegral x*fw) ((ch-1-fromIntegral y)*fh) (0 :: GLdouble)
+        content
 
-renderCanvas :: FrontRead Picture
+renderCanvas :: FrontRead Rendering
 renderCanvas = do
     (cw,ch) <- views (settings.dimensions) (bimap fromIntegral fromIntegral)
     (fw,fh) <- views (settings.fontDimensions) (bimap fromIntegral fromIntegral)
+    lift $ do
+        loadIdentity
+        ortho 0 (cw*fw) 0 (ch*fh) (-5) (5)
+        clear [ColorBuffer]
     g <- view (canvas.grid)
-    Translate (fw*(-cw/2)+1) (fh*(ch/2-1)) . Pictures <$> sequence (M.foldrWithKey (\pos cell list -> renderCell pos cell : list) [] g)
+    sequence_ <$> sequence (M.foldrWithKey (\pos cell list -> renderCell pos cell : list) [] g)
 
 writeToCanvas :: (Int,Int) -> CellContent -> FrontMod ()
 writeToCanvas pos c = do
