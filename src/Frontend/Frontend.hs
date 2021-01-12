@@ -256,6 +256,18 @@ idle ssr fsr = do
     writeIORef fsr fs'
     postRedisplay Nothing
 
+reshape :: IORef FrontendState -> ReshapeCallback
+reshape fsr size = do
+    fs <- readIORef fsr
+    fs' <- execStateT (reshapeFrontend size) fs
+    writeIORef fsr fs'
+
+reshapeFrontend :: Size -> FrontMod ()
+reshapeFrontend (Size w h) = do
+    lift (viewport $= (Position 0 0, (Size w h)))
+    (fw,fh) <- uses (settings.fontDimensions) (bimap fromIntegral fromIntegral)
+    settings.dimensions .= (fromIntegral $ div w fw, fromIntegral $ div h fh)
+    clearCanvas
 
 renderHandler :: (StateStack, FrontendState) -> IO ()
 renderHandler (_, fs) = runReaderT renderFrontend fs
@@ -283,5 +295,6 @@ screenEffect = do
 renderFrontend :: FrontRead ()
 renderFrontend = do
     --se <- screenEffect
+    lift $ clear [ ColorBuffer ]
     cv <- renderCanvas
     lift $ cv

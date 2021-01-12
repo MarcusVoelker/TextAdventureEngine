@@ -102,4 +102,5 @@ mainOpenGL dims title ss dc = do
   ssr  <- newIORef ss
   displayCallback $= display ssr fsr
   idleCallback $= Just (idle ssr fsr)
+  reshapeCallback $= Just (reshape fsr)
   mainLoop

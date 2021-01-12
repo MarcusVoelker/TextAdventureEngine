@@ -16,7 +16,7 @@ pack :: (Persistent a (), Show a, Eq a) => a -> Testable
 pack = MkTestable
 
 testStability :: Testable -> Bool
-testStability (MkTestable a) = a == runReader (evalStateT deserialise (toLazyByteString (serialise a))) ()
+testStability (MkTestable a) = Just a == runReaderT (evalStateT deserialise (toLazyByteString (serialise a))) ()
 
 tests :: [Testable]
 tests = [pack (1 :: Int)
